@@ -1,0 +1,23 @@
+.element-header {
+    width: calc(100% - 10px);
+    height: 50px;
+    margin: 0px 5px;
+    top: 0;
+    
+    position: sticky;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    background-color: var(--background);
+
+    > h1 {
+        margin: 0px;
+        font-size: 30px;
+    }
+
+    > .element-header-chunk  {
+        display: flex;
+        flex-direction: row;
+    }
+}

@@ -1,0 +1,14 @@
+.element-icon {
+    padding: 5px;
+}
+
+.element-icon-hover {
+    border-radius: 5px;
+    transition: var(--default-transition);
+    
+    &:hover {
+        border-radius: 100%;
+        background-color: var(--highlight);
+        cursor: pointer;
+    }
+}
