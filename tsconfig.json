@@ -16,7 +16,9 @@
           "@elements/*": [ "private_modules/elements/*" ],
           "@global/*": [ "private_modules/global/*" ],
           "@rest/*": [ "src/rest/*" ],
-          "@scss/*": [ "src/scss/*" ]
+          "@scss/*": [ "src/scss/*" ],
+          "@customModules/*": [ "src/custom_modules" ],
+          "@customElements/*": [ "src/custom_elements" ]
         }
     },
     "include": [

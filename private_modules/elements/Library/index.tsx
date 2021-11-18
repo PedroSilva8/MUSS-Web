@@ -1,5 +1,6 @@
 import React from "react";
 import Icon from "../Icon";
+import ImageSelector from "../ImageSelector";
 
 import './library.scss'
 
@@ -12,15 +13,7 @@ export interface ILibraryItemProps {
 }
 
 const LibraryItem : React.FC<ILibraryItemProps> = props => {
-    return (
-        <div className="element-library-item" onClick={props.onClick}>
-            <div className="element-library-item-image">
-                { props.image ? <img src={props.image}/> : <></> }
-                { props.icon ? <div className="element-library-item-overlay"><Icon fontSize={ props.iconSize } icon={ props.icon }/></div> : <></> }
-            </div>
-            { props.title ? <span>{ props.title }</span> : <></> }
-        </div>
-    )
+    return (<ImageSelector onClick={ props.onClick } image={ props.image } text={props.title} icon={props.icon} iconSize={props.iconSize} />)
 }
 
 interface ILibraryComposition {

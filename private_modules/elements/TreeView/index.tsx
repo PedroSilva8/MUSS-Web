@@ -5,12 +5,13 @@ import './treeview.scss'
 
 export interface ITreeViewOptionProps { 
     icon?: string
+    onClick?: () => void
     content: string
 }
 
 const TreeViewOption = (props: ITreeViewOptionProps) : React.ReactElement => {
     return (
-        <div className="element-treeview-option">
+        <div className="element-treeview-option" onClick={props.onClick}>
             { props.icon ? <Icon icon={props.icon} /> : <></> }
             <span>{ props.content }</span>
         </div>

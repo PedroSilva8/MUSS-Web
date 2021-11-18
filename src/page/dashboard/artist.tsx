@@ -5,17 +5,21 @@ import Popup from '@elements/Popup'
 import Input from '@elements/Input'
 import ImageSelector from '@elements/ImageSelector'
 
-import { IArtist, IArtistArray } from "@rest/artist";
-import RestArtist from "@rest/artist";
+import RestWraper from "@global/RestWraper";
 
 import NotificationManager from '@global/NotificationManager'
+
+export interface IArtist {
+    id: number
+    name: string
+}
 
 export interface IArtistProps { }
 
 export interface IArtistState { 
     artist: IArtist
     artistIndex: number
-    artists: IArtistArray
+    artists: IArtist[]
 
     isEditorOpend: boolean
     editorImage: string
@@ -23,7 +27,9 @@ export interface IArtistState {
 
 export default class ArtistPage extends React.Component<IArtistProps, IArtistState> {
 
-    public imageFile = React.createRef<ImageSelector>() 
+    imageFile = React.createRef<ImageSelector>() 
+    
+    rest = new RestWraper<IArtist>("artist")
 
     constructor(props: IArtistProps) {
         super(props)
@@ -35,7 +41,7 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
     //#region Server Requests
 
     getArtists = () => {
-        RestArtist.Get({
+        this.rest.GetAll({
             onSuccess: (Data) => this.setState({ artists: Data }),
             onError: () => NotificationManager.Create("Error", "Error Getting Artists", 'danger')
         })
@@ -44,7 +50,7 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
     createArtist = () => {
         if (this.state.editorImage != "") {
             this.imageFile.current.getImage((image) =>
-                RestArtist.Create({
+                this.rest.Create({
                     data: this.state.artist,
                     file: image,
                     onSuccess: (Data) => {
@@ -62,7 +68,8 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
 
     updateArtist = () => {
         //Maybe only make one request?
-        RestArtist.Update({
+        this.rest.Update({
+            index: this.state.artist.id,
             data: this.state.artist,
             onSuccess: (data) => {
                 NotificationManager.Create("Success", "Successfull Update", 'success')
@@ -74,7 +81,8 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
 
         if (this.state.editorImage != "") {
             this.imageFile.current.getImage((image) =>
-                RestArtist.UpdateImage({
+                this.rest.UpdateImage({
+                    index: this.state.artist.id,
                     data: this.state.artist,
                     file: image,
                     onSuccess: () => { },
@@ -85,8 +93,8 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
     }
 
     deleteArtist = () => {
-        RestArtist.Delete({
-            data: this.state.artist,
+        this.rest.Delete({
+            index: this.state.artist.id,
             onSuccess: () => {
                 this.state.artists.splice(this.state.artistIndex, 1)
                 this.setState({artists: this.state.artists, isEditorOpend: false, artistIndex: -1, editorImage: ""})
@@ -112,7 +120,7 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
         this.setState({artist: this.state.artist, artistIndex: index})
     }
 
-    getEditorImage = () : string =>  this.state.editorImage == "" ? this.state.artist.id == -1 ? "" : RestArtist.GetImage(this.state.artist) : this.state.editorImage
+    getEditorImage = () : string =>  this.state.editorImage == "" ? this.state.artist.id == -1 ? "" : this.rest.GetImage(this.state.artist.id) : this.state.editorImage
 
     //#endregion
 
@@ -121,7 +129,7 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
             <>
                 <Library>
                     <Library.Item onClick={() => { this.unSelectArtist(); this.setEditor(true) }} icon="plus" title="New" />
-                    { this.state.artists.map((val, index) => <Library.Item key={index} onClick={() => { this.selectArtist(index); this.setEditor(true) }} iconSize={50} icon="play" image={ RestArtist.GetImage(val) } title={ val.name }/> ) }
+                    { this.state.artists.map((val, index) => <Library.Item key={index} onClick={() => { this.selectArtist(index); this.setEditor(true) }} iconSize={50} icon="play" image={ this.rest.GetImage(val.id) } title={ val.name }/> ) }
                 </Library>
                 <Popup isOpened={this.state.isEditorOpend} >
                     <Popup.Header onClose={() => { this.setEditor(false) }} title="Edit" type="BACK" />

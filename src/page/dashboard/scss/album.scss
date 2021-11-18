@@ -1,0 +1,15 @@
+#AlbumDashboard {
+    display: flex;
+    flex-direction: column;
+
+    > #album-editor-selector {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+    }
+
+    > #album-editor-description {
+        display: flex;
+        flex-direction: column;
+    }
+}
