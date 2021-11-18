@@ -9,6 +9,8 @@ import RestWraper from "@global/RestWraper";
 
 import NotificationManager from '@global/NotificationManager'
 
+import './scss/artist.scss'
+
 export interface IArtist {
     id: number
     name: string
