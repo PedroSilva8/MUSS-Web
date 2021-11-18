@@ -146,19 +146,17 @@ export default class AlbumPage extends React.Component<IAlbumProps, IAlbumState>
                 <Popup isOpened={this.state.isEditorOpend} >
                     <Popup.Header onClose={() => this.state.selectingArtist ? this.setState({selectingArtist: false}) : this.setEditor(false) } title={this.state.selectingArtist ? "Select Artist" : this.state.album.id == -1 ? "Create New" : "Edit" } type="BACK" />
                     <Popup.Content id="AlbumDashboard">
-                        { this.state.selectingArtist ?
-                            <ItemSelector<IAlbum> onSelect={(id) => { this.state.album.artist_id = id; this.setState({album: this.state.album, selectingArtist: false}) } } database="artist" textColumn="name"/>:
-                            <>
-                                <div id="album-editor-selector">
-                                    <ImageSelector ref={ this.imageFile } onChange={ (img) => this.setState({editorImage: img}) } image={ this.getEditorImage() } icon="pencil"/>
-                                    <ImageSelector onClick={() => this.setState({selectingArtist: true})} image={ this.state.album.artist_id == -1 ? "" : new RestWraper<IArtist>("artist").GetImage(this.state.album.artist_id) } icon="pencil"/>
-                                </div>
-                                <div id="album-editor-description">
-                                    <Input label="Name" value={ this.state.album.name } onChange={(v) => { this.state.album.name = v; this.setState({album: this.state.album}) } }/>
-                                    <TextArea label="Description" value={ this.state.album.description } onChange={(v) => { this.state.album.description = v; this.setState({album: this.state.album}) } }/>
-                                </div>
-                            </>
-                        }
+                        { this.state.selectingArtist ? <ItemSelector<IAlbum> onSelect={(id) => { this.state.album.artist_id = id; this.setState({album: this.state.album, selectingArtist: false}) } } database="artist" textColumn="name"/>:<></> }
+                        <div id={ this.state.selectingArtist ? "album-edit-invisible" : "" }>
+                            <div id="album-editor-selector">
+                                <ImageSelector ref={ this.imageFile } onChange={ (img) => this.setState({editorImage: img}) } image={ this.getEditorImage() } icon="pencil"/>
+                                <ImageSelector onClick={() => this.setState({selectingArtist: true})} image={ this.state.album.artist_id == -1 ? "" : new RestWraper<IArtist>("artist").GetImage(this.state.album.artist_id) } icon="pencil"/>
+                            </div>
+                            <div id="album-editor-description">
+                                <Input label="Name" value={ this.state.album.name } onChange={(v) => { this.state.album.name = v; this.setState({album: this.state.album}) } }/>
+                                <TextArea label="Description" value={ this.state.album.description } onChange={(v) => { this.state.album.description = v; this.setState({album: this.state.album}) } }/>
+                            </div>
+                        </div>
                     </Popup.Content>
                     <Popup.Footer>
                         { this.state.selectingArtist ? <></> :

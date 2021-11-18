@@ -1,14 +1,18 @@
 #AlbumDashboard {
     display: flex;
     flex-direction: column;
+    
+    > #album-edit-invisible {
+        display: none;
+    }
 
-    > #album-editor-selector {
+    > div > #album-editor-selector {
         display: flex;
         flex-direction: row;
         gap: 20px;
     }
 
-    > #album-editor-description {
+    > div > #album-editor-description {
         display: flex;
         flex-direction: column;
     }
