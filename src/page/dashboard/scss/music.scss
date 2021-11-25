@@ -1,0 +1,13 @@
+#MusicDashboard {
+    display: flex;
+    flex-direction: column;
+
+    > .element-music-player {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        background-color: var(--surface);
+        padding: 5px;
+        width: calc(100% - 10px);
+    }
+}

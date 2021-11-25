@@ -28,8 +28,10 @@ export default class ImageSelector extends React.Component<IImageSelectorProps, 
 
     onClick = () => this.props.onClick ? this.props.onClick() : this.imageFile.current.click()
 
+    hasImage = () => this.imageFile.current.files && this.imageFile.current.files[0]
+
     getImage = (onSuccess: (image: string) => void, onError: (err: DOMException) => void) : string => {
-        if (this.imageFile.current.files && this.imageFile.current.files[0]) {
+        if (this.hasImage()) {
             var FR = new FileReader()
             FR.onload = () => onSuccess(FR.result.toString())
             FR.onerror= () => onError(FR.error)

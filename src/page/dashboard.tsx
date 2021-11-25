@@ -1,12 +1,13 @@
 import React from "react";
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom'
 
 import Header from '@elements/Header'
 import Icon from '@elements/Icon'
 import TreeView from '@elements/TreeView'
 
-import ArtistPage from "./dashboard/artist";
-import AlbumPage from "./dashboard/album";
+import ArtistPage from "./dashboard/artist"
+import AlbumPage from "./dashboard/album"
+import MusicPage from "./dashboard/music"
 
 export default () => {
     const navegate = useNavigate();
@@ -30,6 +31,7 @@ export default () => {
                     <TreeView.Header title="Library">
                         <TreeView.Header.Option icon="account-music" onClick={() => { navegate("/dashboard/artist") }} content="Artists"/>
                         <TreeView.Header.Option icon="album" onClick={() => { navegate("/dashboard/album") }} content="Album"/>
+                        <TreeView.Header.Option icon="music-note" onClick={() => { navegate("/dashboard/music") }} content="Music"/>
                     </TreeView.Header>
                     <TreeView.Header title="Settings">
                         <TreeView.Header.Option icon="account" content="Users"/>
@@ -41,6 +43,7 @@ export default () => {
                     <Route path={"/"} element={<ArtistPage />}/>
                     <Route path={"/artist/*"} element={<ArtistPage />}/>
                     <Route path={"/album/*"} element={<AlbumPage />}/>
+                    <Route path={"/music/*"} element={<MusicPage />}/>
                 </Routes>
             </div>
         </>

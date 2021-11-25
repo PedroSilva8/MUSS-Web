@@ -5,16 +5,14 @@ import Popup from '@elements/Popup'
 import Input from '@elements/Input'
 import ImageSelector from '@elements/ImageSelector'
 
+import { IArtist } from "@interface/database";
+
 import RestWraper from "@global/RestWraper";
 
 import NotificationManager from '@global/NotificationManager'
 
 import './scss/artist.scss'
-
-export interface IArtist {
-    id: number
-    name: string
-}
+import Networking from "@modules/global/Networking";
 
 export interface IArtistProps { }
 
@@ -35,7 +33,17 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
 
     constructor(props: IArtistProps) {
         super(props)
-        this.state = { artist: { id: -1, name: "" }, artistIndex: -1, artists: [], isEditorOpend: false, editorImage: "" }
+
+        this.state = { 
+            artist: { 
+                id: -1,
+                name: "" 
+            }, 
+            artistIndex: -1, 
+            artists: [], 
+            isEditorOpend: false, 
+            editorImage: "" 
+        }
     }
 
     componentDidMount = () => this.getArtists();
@@ -54,7 +62,7 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
             this.imageFile.current.getImage((image) =>
                 this.rest.Create({
                     data: this.state.artist,
-                    file: image,
+                    file: Networking.file2Argument(image),
                     onSuccess: (Data) => {
                         this.state.artists.push(Data)
                         this.setState({artists: this.state.artists, editorImage: "", isEditorOpend: false})
@@ -136,7 +144,7 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
                 <Popup isOpened={this.state.isEditorOpend} >
                     <Popup.Header onClose={() => { this.setEditor(false) }} title="Edit" type="BACK" />
                     <Popup.Content id="ArtistDashboard">
-                        <ImageSelector ref={ this.imageFile } onChange={ (img) => this.setState({editorImage: img}) } image={ this.getEditorImage() } icon="pencil"/>
+                        <ImageSelector text="Cover" iconSize={50} ref={ this.imageFile } onChange={ (img) => this.setState({editorImage: img}) } image={ this.getEditorImage() } icon="pencil"/>
                         <div>
                             <Input label="Name" value={ this.state.artist.name } onChange={(v) => { this.state.artist.name = v; this.setState({artist: this.state.artist}) } }/>
                         </div>

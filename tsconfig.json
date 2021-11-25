@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es5", /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */
+        "target": "ESNext", /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */
         "module": "commonjs", /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
         "jsx": "react", /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
         "sourceMap": true, /* Generates corresponding '.map' file. */
@@ -17,12 +17,13 @@
           "@global/*": [ "private_modules/global/*" ],
           "@rest/*": [ "src/rest/*" ],
           "@scss/*": [ "src/scss/*" ],
-          "@customModules/*": [ "src/custom_modules" ],
-          "@customElements/*": [ "src/custom_elements" ]
+          "@customModules/*": [ "src/custom_modules/*" ],
+          "@customElements/*": [ "src/custom_elements/*" ],
+          "@interface/*": [ "src/interface/*" ]
         }
     },
     "include": [
         "./src/**/*",
-        "./private:modules/**/*"
+        "./private_modules/**/*"
     ]
 }

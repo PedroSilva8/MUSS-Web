@@ -11,7 +11,7 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: 'js/[name].bundle.js'
     },
-    devtool: "source-map",
+    devtool: "cheap-module-source-map",
     devServer: {
         liveReload: true,
         port: 8080,
@@ -29,7 +29,8 @@ module.exports = {
             "@rest": path.resolve(__dirname, './src/rest'),
             "@scss": path.resolve(__dirname, './src/scss'),
             "@customModules": path.resolve(__dirname, './src/custom_modules'),
-            "@customElements": path.resolve(__dirname, './src/custom_modules/custom_elements')
+            "@customElements": path.resolve(__dirname, './src/custom_modules/custom_elements'),
+            "@interface": path.resolve(__dirname, './src/interface')
         }
     },
     module: {

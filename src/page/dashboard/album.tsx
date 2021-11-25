@@ -9,19 +9,14 @@ import ItemSelector from '@elements/ItemSelector'
 
 import RestWraper from "@global/RestWraper";
 
+import { IAlbum, IArtist } from "@interface/database";
+
 import NotificationManager from '@global/NotificationManager'
-import Networking from "@modules/global/Networking";
-import { IArtist } from "./artist";
+import Networking from "@global/Networking";
+
 
 import './scss/album.scss'
 
-export interface IAlbum {
-    [key: string]: number | string; /* allow interface to be indexed with string */
-    id: number
-    artist_id: number
-    name: string
-    description: string
-}
 
 export interface IAlbumProps { }
 
@@ -43,7 +38,20 @@ export default class AlbumPage extends React.Component<IAlbumProps, IAlbumState>
 
     constructor(props: IAlbumProps) {
         super(props)
-        this.state = { album: { id: -1, artist_id: -1, name: "", description: "" }, albumIndex: -1, albums: [], isEditorOpend: false, selectingArtist: false, editorImage: "" }
+        
+        this.state = { 
+            album: { 
+                id: -1, 
+                artist_id: -1, 
+                name: "", 
+                description: "" 
+            }, 
+            albumIndex: -1,
+            albums: [], 
+            isEditorOpend: false, 
+            selectingArtist: false, 
+            editorImage: "" 
+        }
     }
 
     componentDidMount = () => this.getAlbum();
@@ -94,7 +102,7 @@ export default class AlbumPage extends React.Component<IAlbumProps, IAlbumState>
                 this.rest.UpdateImage({
                     index: this.state.album.id,
                     data: this.state.album,
-                    file: Networking.file2Argument(image),
+                    file: image,
                     onSuccess: () => { },
                     onError: (data) => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
                 }),
@@ -149,8 +157,8 @@ export default class AlbumPage extends React.Component<IAlbumProps, IAlbumState>
                         { this.state.selectingArtist ? <ItemSelector<IAlbum> onSelect={(id) => { this.state.album.artist_id = id; this.setState({album: this.state.album, selectingArtist: false}) } } database="artist" textColumn="name"/>:<></> }
                         <div id={ this.state.selectingArtist ? "album-edit-invisible" : "" }>
                             <div id="album-editor-selector">
-                                <ImageSelector ref={ this.imageFile } onChange={ (img) => this.setState({editorImage: img}) } image={ this.getEditorImage() } icon="pencil"/>
-                                <ImageSelector onClick={() => this.setState({selectingArtist: true})} image={ this.state.album.artist_id == -1 ? "" : new RestWraper<IArtist>("artist").GetImage(this.state.album.artist_id) } icon="pencil"/>
+                                <ImageSelector iconSize={50} text="Cover" ref={ this.imageFile } onChange={ (img) => this.setState({editorImage: img}) } image={ this.getEditorImage() } icon="pencil"/>
+                                <ImageSelector iconSize={50} text="Artist" onClick={() => this.setState({selectingArtist: true})} image={ this.state.album.artist_id == -1 ? "" : new RestWraper<IArtist>("artist").GetImage(this.state.album.artist_id) } icon="pencil"/>
                             </div>
                             <div id="album-editor-description">
                                 <Input label="Name" value={ this.state.album.name } onChange={(v) => { this.state.album.name = v; this.setState({album: this.state.album}) } }/>

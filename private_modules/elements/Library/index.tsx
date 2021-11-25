@@ -13,7 +13,7 @@ export interface ILibraryItemProps {
 }
 
 const LibraryItem : React.FC<ILibraryItemProps> = props => {
-    return (<ImageSelector onClick={ props.onClick } image={ props.image } text={props.title} icon={props.icon} iconSize={props.iconSize} />)
+    return <ImageSelector onClick={ props.onClick ? props.onClick : () => {} } image={ props.image } text={props.title} icon={props.icon} iconSize={props.iconSize} />
 }
 
 interface ILibraryComposition {

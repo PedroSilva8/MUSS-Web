@@ -34,6 +34,13 @@ export interface ICreate<T> {
     onError: (Data: RestResponse) => void
 }
 
+export interface ICreateWFiles<T> {
+    data: T
+    files: { [key: string]: string; }
+    onSuccess: (Data: T) => void
+    onError: (Data: RestResponse) => void
+}
+
 export interface IDelete<T> {
     index: number
     onSuccess: () => void
@@ -105,6 +112,15 @@ export default class RestWraper<T> {
         RestHelper.CreateItem({
             target: this.Target,
             Values: {...props.data, ...{ file: props.file }},
+            onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
+            onError: props.onError
+        })
+    }
+
+    CreateWFiles = (props:ICreateWFiles<T>) => {
+        RestHelper.CreateItem({
+            target: this.Target,
+            Values: { ...props.data, ...props.files },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
             onError: props.onError
         })

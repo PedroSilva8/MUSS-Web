@@ -41,6 +41,10 @@
             padding: 10px 20px;
             overflow: auto;
             overflow-x: hidden;
+
+            > * {
+                flex-shrink: 0;
+            }
         }
 
         > .element-popup-footer {
