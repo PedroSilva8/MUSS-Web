@@ -101,7 +101,6 @@ export default class AlbumPage extends React.Component<IAlbumProps, IAlbumState>
             this.imageFile.current.getImage((image) =>
                 this.rest.UpdateImage({
                     index: this.state.album.id,
-                    data: this.state.album,
                     file: image,
                     onSuccess: () => { },
                     onError: (data) => NotificationManager.Create("Error", "Error Updating Artist", 'danger')

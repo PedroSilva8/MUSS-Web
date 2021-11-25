@@ -93,7 +93,6 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
             this.imageFile.current.getImage((image) =>
                 this.rest.UpdateImage({
                     index: this.state.artist.id,
-                    data: this.state.artist,
                     file: image,
                     onSuccess: () => { },
                     onError: (data) => NotificationManager.Create("Error", "Error Updating Artist", 'danger')

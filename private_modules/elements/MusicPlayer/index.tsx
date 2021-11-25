@@ -8,7 +8,9 @@ import Cookies from 'js-cookie'
 
 import './MusicPlayer.scss'
 
-export interface IMusicPlayerProps { }
+export interface IMusicPlayerProps { 
+    src: string
+}
 
 export interface IMusicPlayerState { 
     playerSlider: number
@@ -23,7 +25,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     audio: HTMLAudioElement = new Audio()
 
     public static defaultProps = {
-
+        src: ""
     };
 
     constructor(props: IMusicPlayerProps) {
@@ -35,6 +37,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
         this.audio.ontimeupdate = this.onAudioProgress
         this.audio.onloadeddata = this.onAudioLoad
         this.audio.oncanplaythrough = () => this.audio.play()
+        this.audio.src = this.props.src
     }
 
     onSelectAudio = (e: ChangeEvent<HTMLInputElement>) => {

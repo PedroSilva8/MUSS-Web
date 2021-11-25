@@ -41,8 +41,7 @@ export interface IUpdateItem {
 export interface IUpdateFile {
     target: string
     id: IndexKind
-    fileName: string
-    fileData: string
+    fileData: { [key: string]: string; }
     onSuccess?: (Data: RestResponse) => void
     onError?: (Data: RestResponse) => void
 }
@@ -170,24 +169,26 @@ export default class RestHelper {
     }
 
     static UpdateFile = (props: IUpdateFile) => {
-        Networking.sendFile({
-            url: `${RestHelper.baseURL}${props.target}/${props.id}/${props.fileName}`,
-            uploadType: 'PUT',
-            file: props.fileData,
-            onSuccess: (Data) => {
-                var Response = RestHelper.DataToResponse(Data);
-                if (!Response.isValid || Response.status != 0) {
+        for (let key in props.fileData) {
+            Networking.sendFile({
+                url: `${RestHelper.baseURL}${props.target}/${props.id}/${key}`,
+                uploadType: 'PUT',
+                file: props.fileData[key],
+                onSuccess: (Data) => {
+                    var Response = RestHelper.DataToResponse(Data);
+                    if (!Response.isValid || Response.status != 0) {
+                        if (props.onError)
+                            props.onError(Response);
+                    }
+                    else if (props.onSuccess)
+                        props.onSuccess(Response);
+                },
+                onError: (Data) => {
                     if (props.onError)
-                        props.onError(Response);
+                        props.onError(RestHelper.ErrorToResponse(Data));
                 }
-                else if (props.onSuccess)
-                    props.onSuccess(Response);
-            },
-            onError: (Data) => {
-                if (props.onError)
-                    props.onError(RestHelper.ErrorToResponse(Data));
-            }
-        });
+            });
+        }
     }
 
     static DeleteItem = (props:IDeleteItem) => {

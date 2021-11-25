@@ -12,6 +12,12 @@ export interface IGetAll<T> {
     onError: (Data: RestResponse) => void
 }
 
+export interface IGetWhere<T> {
+    arguments?: { [key: string]: string; }
+    onSuccess: (Data: T[]) => void
+    onError: (Data: RestResponse) => void
+}
+
 export interface IUpdate<T> {
     index: number
     data: T
@@ -19,9 +25,15 @@ export interface IUpdate<T> {
     onError: (Data: RestResponse) => void
 }
 
+export interface IUpdateFile<T> {
+    index: number
+    files: { [key: string]: string; }
+    onSuccess: () => void
+    onError: (Data: RestResponse) => void
+}
+
 export interface IUpdateImage<T> {
     index: number
-    data: T
     file: string
     onSuccess: () => void
     onError: (Data: RestResponse) => void
@@ -87,6 +99,15 @@ export default class RestWraper<T> {
         });
     }
 
+    GetWhere = (props:IGetWhere<T>) => {
+        RestHelper.GetItems({
+            target: this.Target,
+            arguments: props.arguments,
+            onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)),
+            onError: props.onError
+        });
+    }
+
     Update = (props:IUpdate<T>) => {
         RestHelper.UpdateItems({
             id: props.index,
@@ -97,12 +118,21 @@ export default class RestWraper<T> {
         })
     }
 
+    UpdateFile = (props:IUpdateFile<T>) => {
+        RestHelper.UpdateFile({
+            id: props.index,
+            target: this.Target,
+            fileData: props.files,
+            onSuccess: (data) => props.onSuccess(),
+            onError: props.onError
+        })
+    }
+
     UpdateImage = (props:IUpdateImage<T>) => {
         RestHelper.UpdateFile({
             id: props.index,
             target: this.Target,
-            fileData: props.file,
-            fileName: "image",
+            fileData: { image: props.file },
             onSuccess: (data) => props.onSuccess(),
             onError: props.onError
         })
@@ -135,5 +165,6 @@ export default class RestWraper<T> {
         })
     }
 
-    GetImage = (index: number) : string => `${RestHelper.baseURL}${this.Target}/${index}/image` 
+    GetImage = (index: number) : string => `${RestHelper.baseURL}${this.Target}/${index}/image`
+    GetFile = (index: number, file: string) : string => `${RestHelper.baseURL}${this.Target}/${index}/${file}` 
 }
