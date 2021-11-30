@@ -60,9 +60,25 @@ export default class ArtistPage extends React.Component<IArtistProps, IArtistSta
     createArtist = () => {
         if (this.state.editorImage != "") {
             this.imageFile.current.getImage((image) =>
+                //Networking.asyncFileToArgument({
+                //    file: image,
+                //    onSucess: (cover) => {
+                //        this.rest.Create({
+                //            data: this.state.artist,
+                //            file: cover,
+                //            onSuccess: (Data) => {
+                //                this.state.artists.push(Data)
+                //                this.setState({artists: this.state.artists, editorImage: "", isEditorOpend: false})
+                //                NotificationManager.Create("Success", "Success Updating Artist", 'success')
+                //            },
+                //            onError: () => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
+                //        })
+                //    },
+                //    onError: () => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
+                //}),
                 this.rest.Create({
                     data: this.state.artist,
-                    file: Networking.file2Argument(image),
+                    file: image,
                     onSuccess: (Data) => {
                         this.state.artists.push(Data)
                         this.setState({artists: this.state.artists, editorImage: "", isEditorOpend: false})

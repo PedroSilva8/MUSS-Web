@@ -70,7 +70,7 @@ export default class AlbumPage extends React.Component<IAlbumProps, IAlbumState>
             this.imageFile.current.getImage((image) =>
                 this.rest.Create({
                     data: this.state.album,
-                    file: Networking.file2Argument(image),
+                    file: image,
                     onSuccess: (Data) => {
                         this.state.albums.push(Data)
                         this.setState({albums: this.state.albums, editorImage: "", isEditorOpend: false})

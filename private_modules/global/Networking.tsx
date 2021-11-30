@@ -1,5 +1,6 @@
 import $ from 'jquery'
 import { compress } from 'lz-string';
+import { compressToUTF16 } from 'async-lz-string';
 
 interface ISendRequestProps {
     url: string
@@ -18,11 +19,21 @@ interface ISendFiles {
     onError?:(data: any) => void
 }
 
+interface IFileToArgument { 
+    file: string, 
+    onSucess?: (file: string) => void, 
+    onError?: (data: any) => void 
+}
+
 export default class Networking {
 
     static baseURL : string = 'http://localhost:3000/api/';
 
-    static file2Argument = (file: string) => escape(compress(file))
+    public static asyncFileToArgument = (props: IFileToArgument) => compressToUTF16(props.file).then((val) => props.onSucess(escape(val)), props.onError)
+    
+    public static fileToArgument = (file: string) => {
+        return escape(compress(file))
+    }
 
     static sendRequest = (props: ISendRequestProps) : void => {
         $.ajax({
@@ -37,9 +48,22 @@ export default class Networking {
     }
 
     static sendFile = (props: ISendFiles) : void => {
+        //this.asyncFileToArgument({
+        //    file: props.file,
+        //    onSucess: (file) => {
+        //        Networking.sendRequest({
+        //            url: props.url,
+        //            data: { file: file },
+        //            type: props.uploadType,
+        //            onSuccess: props.onSuccess,
+        //            onError: props.onError
+        //        })
+        //    },
+        //    onError: props.onError
+        //})
         Networking.sendRequest({
             url: props.url,
-            data: { file: this.file2Argument(props.file) },
+            data: { file: props.file },
             type: props.uploadType,
             onSuccess: props.onSuccess,
             onError: props.onError

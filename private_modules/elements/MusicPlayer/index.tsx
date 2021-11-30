@@ -72,15 +72,15 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
         Cookies.set('volume', val.toString())
     }
 
-    getMusic = (onSuccess: (image: string) => void, onError: (err: DOMException) => void) : string => {
-        if (this.audioFile.current.files && this.audioFile.current.files[0]) {
+    hasMusic = () => this.audioFile.current.files && this.audioFile.current.files[0]
+
+    getMusic = (onSuccess: (image: string) => void, onError: (err: DOMException) => void) => {
+        if (this.hasMusic()) {
             var FR = new FileReader()
             FR.onload = () => onSuccess(FR.result.toString())
             FR.onerror= () => onError(FR.error)
             FR.readAsDataURL(this.audioFile.current.files[0])
         }
-
-        return ""
     }
 
     render = () => {

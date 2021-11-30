@@ -139,6 +139,18 @@ export default class RestWraper<T> {
     }
 
     Create = (props:ICreate<T>) => {
+        //Networking.asyncFileToArgument({
+        //    file: props.file,
+        //    onSucess: (file) => {
+        //        RestHelper.CreateItem({
+        //            target: this.Target,
+        //            Values: {...props.data, ...{ file: file }},
+        //            onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
+        //            onError: props.onError
+        //        })
+        //    },
+        //    onError: props.onError
+        //})
         RestHelper.CreateItem({
             target: this.Target,
             Values: {...props.data, ...{ file: props.file }},
@@ -147,7 +159,29 @@ export default class RestWraper<T> {
         })
     }
 
+    ProcessFiles = async (files: { [key: string]: string; }) => {
+        const promises = []
+        
+        for (var key in files)
+            promises.push(new Promise(resolve => {
+                Networking.asyncFileToArgument({
+                    file: files[key],
+                    onSucess: (data) => resolve({[key]: data})
+                })
+            }))
+
+        return Promise.all(promises)
+    }
+
     CreateWFiles = (props:ICreateWFiles<T>) => {
+        //this.ProcessFiles(props.files).then((files) => {
+        //    RestHelper.CreateItem({
+        //        target: this.Target,
+        //        Values: { ...props.data, ...files },
+        //        onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
+        //        onError: props.onError
+        //    })
+        //})
         RestHelper.CreateItem({
             target: this.Target,
             Values: { ...props.data, ...props.files },
