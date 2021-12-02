@@ -40,8 +40,13 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     componentDidMount = () => {            
         this.audio.ontimeupdate = this.onAudioProgress
         this.audio.onloadeddata = this.onAudioLoad
-        this.audio.oncanplaythrough = () => this.audio.play()
+        this.audio.oncanplaythrough = () => { this.audio.play(); this.setState({isPlaying: true}) }
         this.audio.src = this.props.src
+    }
+
+    componentWillUnmount = () => {
+        this.audio.pause()
+        delete this.audio
     }
 
     onSelectAudio = (e: ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +77,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     }
 
     changeAudioState = () => {
-        this.setState({isPlaying: !this.state.isPlaying}, () => this.state.isPlaying ? this.audio.play() : this.audio.pause())
+        this.state.isPlaying ? this.audio.play() : this.audio.pause()
     }
 
     onAudioChange = (val: number) => {
@@ -82,6 +87,12 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     }
 
     hasMusic = () => this.audioFile.current.files && this.audioFile.current.files[0]
+
+    getMusicLength = () => {
+        if (this.hasMusic())
+            return new Date(this.audio.duration * 1000).toISOString().substr(11, 8);
+        return "00:00:00"
+    }
 
     getMusic = (onSuccess: (image: string) => void, onError: (err: DOMException) => void) => {
         if (this.hasMusic()) {
