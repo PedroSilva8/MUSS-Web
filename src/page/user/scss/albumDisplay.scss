@@ -1,7 +1,9 @@
 #album-display {
     display: flex;
     flex-direction: column;
-
+    width: 100%;
+    overflow: auto;
+    
     > #album-display-header {
         height: 30%;
         margin: 10px;
@@ -10,6 +12,7 @@
 
         > img {
             height: 100%;
+            aspect-ratio: 1;
             box-shadow: 0 0 10px black;
         }
 
@@ -24,6 +27,7 @@
                 font-size: 4em;
                 font-weight: bold;
                 margin: 10px 0px;
+                text-shadow: 0 0 10px black;
             }
         }
     }

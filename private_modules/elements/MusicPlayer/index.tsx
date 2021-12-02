@@ -10,6 +10,8 @@ import './MusicPlayer.scss'
 
 export interface IMusicPlayerProps { 
     src: string
+    id: string
+    canUpload: boolean
 }
 
 export interface IMusicPlayerState { 
@@ -25,7 +27,9 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     audio: HTMLAudioElement = new Audio()
 
     public static defaultProps = {
-        src: ""
+        src: "",
+        id: "",
+        canUpload: false
     };
 
     constructor(props: IMusicPlayerProps) {
@@ -50,6 +54,11 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
 
     onAudioLoad = () => {
         this.setState({duration: this.audio.duration*1000})
+    }
+
+    componentDidUpdate(prevProps: IMusicPlayerProps) {
+        if (prevProps.src != this.props.src)
+            this.audio.src = this.props.src
     }
 
     onAudioProgress = (e: ProgressEvent<EventTarget>) => {
@@ -85,9 +94,12 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
 
     render = () => {
         return (
-            <div className="element-music-player">
-                <input type="file" ref={this.audioFile} onChange={this.onSelectAudio} style={{display: 'none'}}/>
-                <Icon onClick={() => this.audioFile.current.click() } canHover={true} icon="upload"/>
+            <div id={ this.props.id } className="element-music-player">
+                { this.props.canUpload ?  <>
+                        <Icon onClick={() => this.audioFile.current.click() } canHover={true} icon="upload"/>
+                        <input type="file" ref={this.audioFile} onChange={this.onSelectAudio} style={{display: 'none'}}/>
+                    </>:<></>
+                }
                 <Icon canHover={true} onClick={this.changeAudioState} icon={ this.state.isPlaying ? "pause" : "play" }/>
                 <Slider id="player-slider" onChange={this.onAudioSliderChange} value={this.state.playerSlider} maxValue={this.state.duration} />
                 <Icon canHover={true} icon="volume-high"/>

@@ -5,6 +5,8 @@ import { IAlbum } from "@interface/database"
 import RestWraper from "@global/RestWraper";
 import NotificationManager from "@global/NotificationManager";
 
+import MusicTable from "@customElements/music_table";
+
 import { useParams } from "react-router";
 
 import './scss/albumDisplay.scss'
@@ -32,7 +34,7 @@ const AlbumDisplayPage = () => {
                 </div>
             </div>
             <div id="album-display-content">
-
+                <MusicTable albumId={parseInt(id)}/>
             </div>
         </div>
     )

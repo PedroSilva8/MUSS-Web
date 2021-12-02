@@ -28,9 +28,9 @@ module.exports = {
             "@global": path.resolve(__dirname, './private_modules/global/'),
             "@rest": path.resolve(__dirname, './src/rest'),
             "@scss": path.resolve(__dirname, './src/scss'),
-            "@customModules": path.resolve(__dirname, './src/custom_modules'),
-            "@customElements": path.resolve(__dirname, './src/custom_modules/custom_elements'),
-            "@interface": path.resolve(__dirname, './src/interface')
+            "@customElements": path.resolve(__dirname, './src/custom_elements'),
+            "@interface": path.resolve(__dirname, './src/interface'),
+            "@context": path.resolve(__dirname, './src/context')
         }
     },
     module: {

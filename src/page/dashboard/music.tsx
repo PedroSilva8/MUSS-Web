@@ -7,7 +7,7 @@ import Input from "@elements/Input"
 import MusicPlayer from "@elements/MusicPlayer"
 import TextArea from "@elements/TextArea"
 
-import { IAlbum, IMusic } from "src/interface/database"
+import { defaultIMusic, IAlbum, IMusic } from "@interface/database"
 
 import RestWraper from "@global/RestWraper"
 
@@ -29,7 +29,7 @@ const MusicPage = () => {
     const [state, setState] = useState<IMusicState>({ 
         isEditorOpend: false,
         musicCover: "",
-        music: { id: -1, album_id: -1, name: "", description: "" },
+        music: defaultIMusic,
         musics: [],
         albums: []
     })
@@ -129,7 +129,7 @@ const MusicPage = () => {
                 NotificationManager.Create("Success", "Success Deleting Music", 'success')
                 state.musics.splice(selectedMusic, 1)
                 musicFile.current?.audio.pause()
-                setState({...state, music: { id: -1, album_id: -1, name: "", description: "" }})
+                setState({...state, music: defaultIMusic})
                 setSelectedMusic(-1)
                 popupGoBack()
             },
@@ -153,7 +153,7 @@ const MusicPage = () => {
         if (selectedMusic == -2)
             setState({...state, isEditorOpend: false})
         else {
-            setState({...state, music: { id: -1, album_id: -1, name: "", description: "" }, musicCover: ""})
+            setState({...state, music: defaultIMusic, musicCover: ""})
             setSelectedMusic(-2)
         }
         musicFile.current?.audio.pause()
@@ -187,7 +187,7 @@ const MusicPage = () => {
                             <ImageSelector ref={ coverFile } onChange={(img) => setState({...state, musicCover: img})} image={state.musicCover != "" || state.music.id == -1 ? state.musicCover : restMusic.GetImage(state.music.id)} text="Cover"/>
                             <Input onChange={(v) => { state.music.name = v; setState({...state, music: state.music}) }} value={ state.music.name } label="Name"/>
                             <TextArea onChange={(v) => { state.music.description = v; setState({...state, music: state.music}) }} value={ state.music.description } label="Description"/>
-                            <MusicPlayer src={restMusic.GetFile(state.music.id, "music")} ref={ musicFile }/>
+                            <MusicPlayer canUpload={true} src={restMusic.GetFile(state.music.id, "music")} ref={ musicFile }/>
                         </>
                     }
                 </Popup.Content>
