@@ -40,7 +40,9 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     componentDidMount = () => {            
         this.audio.ontimeupdate = this.onAudioProgress
         this.audio.onloadeddata = this.onAudioLoad
-        this.audio.oncanplaythrough = () => { this.audio.play(); this.setState({isPlaying: true}) }
+        this.audio.oncanplaythrough = () => this.audio.play()
+        this.audio.onplay = () =>  this.setState({isPlaying: true})
+        this.audio.onpause = () =>  this.setState({isPlaying: false})
         this.audio.src = this.props.src
     }
 
@@ -77,7 +79,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     }
 
     changeAudioState = () => {
-        this.state.isPlaying ? this.audio.play() : this.audio.pause()
+        this.state.isPlaying ? this.audio.pause() : this.audio.play()
     }
 
     onAudioChange = (val: number) => {
