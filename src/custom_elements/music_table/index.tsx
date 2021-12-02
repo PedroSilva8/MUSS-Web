@@ -40,7 +40,7 @@ const MusicTable = (props: IMusicTableProps) => {
                 <span>TIME</span>
             </div>
             <div className="music-table-rows">
-                { state.musics.map((val, i) => <div onClick={() => setMusic(val)} className="music-table-row">
+                { state.musics.map((val, i) => <div key={i} onClick={() => setMusic(val)} className="music-table-row">
                     <span>{ i + 1 }</span>
                     <span className="music-table-grow">{ val.name }</span>
                     <span>{ val.length }</span>
