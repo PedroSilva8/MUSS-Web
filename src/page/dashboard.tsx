@@ -16,7 +16,7 @@ export default () => {
         <>
             <Header>
                 <Header.Chunk id="header-chunck-left">
-                    
+                    <Icon onClick={() => navegate("/") } icon="home" canHover={true}/>
                 </Header.Chunk>
                 <Header.Chunk id="header-chunck-center" isMaxed={true}>
                     
@@ -29,9 +29,9 @@ export default () => {
             <div id="content">
                 <TreeView>
                     <TreeView.Header title="Library">
-                        <TreeView.Header.Option icon="account-music" onClick={() => { navegate("/dashboard/artist") }} content="Artists"/>
-                        <TreeView.Header.Option icon="album" onClick={() => { navegate("/dashboard/album") }} content="Album"/>
-                        <TreeView.Header.Option icon="music-note" onClick={() => { navegate("/dashboard/music") }} content="Music"/>
+                        <TreeView.Header.Option icon="account-music" onClick={() => navegate("/dashboard/artist") } content="Artists"/>
+                        <TreeView.Header.Option icon="album" onClick={() => navegate("/dashboard/album") } content="Album"/>
+                        <TreeView.Header.Option icon="music-note" onClick={() => navegate("/dashboard/music") } content="Music"/>
                     </TreeView.Header>
                     <TreeView.Header title="Settings">
                         <TreeView.Header.Option icon="account" content="Users"/>

@@ -8,6 +8,7 @@ export interface IGet<T> {
 }
 
 export interface IGetAll<T> {
+    custom?: string
     onSuccess: (Data: T[]) => void
     onError: (Data: RestResponse) => void
 }
@@ -93,7 +94,7 @@ export default class RestWraper<T> {
 
     GetAll = (props:IGetAll<T>) => {
         RestHelper.GetItems({
-            target: this.Target,
+            target: this.Target + (props.custom ? props.custom : ""),
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)),
             onError: props.onError
         });

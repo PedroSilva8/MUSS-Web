@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useReducer, useState } from "react";
 
 import Library from '@elements/Library'
 import Popup from '@elements/Popup'
@@ -12,100 +12,91 @@ import { IAlbum, IMusic } from "src/interface/database"
 import RestWraper from "@global/RestWraper"
 
 import './scss/music.scss'
-import Networking from "@global/Networking";
 import NotificationManager from "@global/NotificationManager";
 
 
-export interface IMusicProps { }
-
-export interface IMusicState { 
+export interface IMusicState {
     isEditorOpend: boolean
     musicCover: string
-
-    albums: IAlbum[]
     
-    music: IMusic
     musics: IMusic[]
+    albums: IAlbum[]
 
-    selectedAlbum: number
-    selectedMusic: number
+    music: IMusic
 }
 
-export default class MusicPage extends React.Component<IMusicProps, IMusicState> {
+const MusicPage = () => {
+    const [state, setState] = useState<IMusicState>({ 
+        isEditorOpend: false,
+        musicCover: "",
+        music: { id: -1, album_id: -1, name: "", description: "" },
+        musics: [],
+        albums: []
+    })
 
-    coverFile = React.createRef<ImageSelector>()
-    musicFile = React.createRef<MusicPlayer>() 
+    const  [ selectedAlbum, setSelectedAlbum ] = useState<number>(-1)
+    const  [ selectedMusic, setSelectedMusic ] = useState<number>(-2)
 
-    restMusic = new RestWraper<IMusic>("music")
-    restAlbum = new RestWraper<IAlbum>("album")
+    var coverFile = React.createRef<ImageSelector>()
+    var musicFile = React.createRef<MusicPlayer>() 
 
-    constructor(props: IMusicProps) {
-        super(props)
-        this.state = { 
-            isEditorOpend: false,
-            musicCover: "",
-            music: { id: -1, album_id: -1, name: "", description: "" },
-            albums: [],
-            musics: [],
-            selectedAlbum: -1,
-            selectedMusic: -2
-         }
-    }
+    var restMusic = new RestWraper<IMusic>("music")
+    var restAlbum = new RestWraper<IAlbum>("album")
 
-    componentDidMount = () => {
-        this.restAlbum.GetAll({
-            onSuccess: (albums) => this.setState({albums: albums}),
+    
+    useEffect(() =>
+        restAlbum.GetAll({
+            onSuccess: (albums) => setState({...state, albums}),
             onError: () => { }
-        })
-    }
+        }), [])
 
-    sendMusicCreate = (music: string, cover: string) => {
+    useEffect(() => onLoadAlbum(), [selectedAlbum])
 
-    }
+    //#region Functions
 
-    createMusic = async (music: string, cover: string) => {
-        this.state.music.album_id = this.state.albums[this.state.selectedAlbum].id
-        this.setState({music: this.state.music})
+    const createMusic = async (music: string, cover: string) => {
+        state.music.album_id = state.albums[selectedAlbum].id
+        setState({...state, music: state.music})
 
-        this.restMusic.CreateWFiles({
-            data: this.state.music,
+        restMusic.CreateWFiles({
+            data: state.music,
             files: {
                 music: music,
                 cover: cover
             },
             onSuccess: () => {
                 NotificationManager.Create("Success", "Success Creating Music", 'success')
-                this.onLoadAlbum()
-                this.musicFile.current?.audio.pause()
-                this.popupGoBack()
+                onLoadAlbum()
+                musicFile.current?.audio.pause()
+                popupGoBack()
             },
             onError: () => NotificationManager.Create("Error", "Error Creating Music", 'danger')
         })
     }
 
-    onCreateMusic = () => {
-        if (!this.musicFile.current.hasMusic()) {
+    const onCreateMusic = () => {
+        if (!musicFile.current.hasMusic()) {
             NotificationManager.Create("Error", "Error Creating Music - Missing Audio File", 'danger')
             return;
         }
         
-        this.musicFile.current.getMusic(
+        musicFile.current.getMusic(
             (music) => {
-                if (this.coverFile.current.hasImage())
-                    this.coverFile.current.getImage(
-                        (img) => this.createMusic(music, img),
+                if (coverFile.current.hasImage())
+                    coverFile.current.getImage(
+                        (img) => createMusic(music, img),
                         (err) => {}
                     )
-                this.createMusic(music, "")
+                createMusic(music, "")
             },
             () => NotificationManager.Create("Error", "Error Creating Music - Faild To Load Audio File", 'danger')
         )
     }
 
-    onUpdateMusic = () => {
-        this.musicFile.current.getMusic(
-            (music) => this.restMusic.UpdateFile({
-                index: this.state.music.id, 
+    const onUpdateMusic = () => {
+        musicFile.current.getMusic(
+            (music) => restMusic.UpdateFile({
+                index: state.music.id, 
                 files: { music: music }, 
                 onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
                 onError: () => NotificationManager.Create("Error", "Error Updating Music File", 'danger') 
@@ -113,9 +104,9 @@ export default class MusicPage extends React.Component<IMusicProps, IMusicState>
             () => {}
         )
 
-        this.coverFile.current.getImage(
-            (cover) => this.restMusic.UpdateFile({
-                index: this.state.music.id, 
+        coverFile.current.getImage(
+            (cover) => restMusic.UpdateFile({
+                index: state.music.id, 
                 files: { image: cover }, 
                 onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
                 onError: () => NotificationManager.Create("Error", "Error Updating Music Cover File", 'danger') 
@@ -123,89 +114,96 @@ export default class MusicPage extends React.Component<IMusicProps, IMusicState>
             () => {}
         )
 
-        this.restMusic.Update({
-            index: this.state.music.id,
-            data: this.state.music,
+        restMusic.Update({
+            index: state.music.id,
+            data: state.music,
             onSuccess: () => NotificationManager.Create("Success", "Success Updating Music", 'success'),
             onError: () => NotificationManager.Create("Error", "Error Updating Music", 'danger')
         })
     }
 
-    onDeleteMusic = () => {
-        this.restMusic.Delete({
-            index: this.state.music.id,
+    const onDeleteMusic = () => {
+        restMusic.Delete({
+            index: state.music.id,
             onSuccess: () => { 
                 NotificationManager.Create("Success", "Success Deleting Music", 'success')
-                this.state.musics.splice(this.state.selectedMusic, 1)
-                this.musicFile.current?.audio.pause()
-                this.setState({musics: this.state.musics, selectedMusic: -1, music: { id: -1, album_id: -1, name: "", description: "" }})
-                this.popupGoBack()
+                state.musics.splice(selectedMusic, 1)
+                musicFile.current?.audio.pause()
+                setState({...state, music: { id: -1, album_id: -1, name: "", description: "" }})
+                setSelectedMusic(-1)
+                popupGoBack()
             },
             onError: () => NotificationManager.Create("Error", "Error Deleting Music", 'danger')
         })
     }
 
-    onLoadAlbum = () => {
-        this.restMusic.GetWhere({
+    const onLoadAlbum = () => {
+        if (selectedAlbum == -1)
+            return;
+        restMusic.GetWhere({
             arguments: {
-                album_id: this.state.albums[this.state.selectedAlbum].id.toString()
+                album_id: state.albums[selectedAlbum].id.toString()
             },
-            onSuccess: (music) => this.setState({musics: music}),
+            onSuccess: (musics) => setState({...state, musics}),
             onError: () => NotificationManager.Create("Error", "Error Loading Albums", 'danger')
         })
     }
 
-    popupGoBack = () => {
-        if (this.state.selectedMusic == -2)
-            this.setState({isEditorOpend: false})
-        else
-            this.setState({selectedMusic: -2, music: { id: -1, album_id: -1, name: "", description: "" }, musicCover: ""})
-        this.musicFile.current?.audio.pause()
+    const popupGoBack = () => {
+        if (selectedMusic == -2)
+            setState({...state, isEditorOpend: false})
+        else {
+            setState({...state, music: { id: -1, album_id: -1, name: "", description: "" }, musicCover: ""})
+            setSelectedMusic(-2)
+        }
+        musicFile.current?.audio.pause()
     }
 
-    getPopupTitle = () => {
-        if (this.state.selectedMusic == -2 && this.state.selectedAlbum != -1)
-            return "Edit " + this.state.albums[this.state.selectedAlbum].name
-        if (this.state.selectedMusic == -1)
+    const getPopupTitle = () => {
+        if (selectedMusic == -2 && selectedAlbum != -1)
+            return "Edit " + state.albums[selectedAlbum].name
+        if (selectedMusic == -1)
             return "Add Music"
         else
-            return "Edit " + this.state.music.name
+            return "Edit " + state.music.name
     }
 
-    render = () => {
-        return (
-            <>
-                <Library>
-                    { this.state.albums.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() => this.setState({isEditorOpend: true, selectedAlbum: i}, () => this.onLoadAlbum())} image={ this.restAlbum.GetImage(val.id) } title={val.name}/>) }
-                </Library>
-                <Popup isOpened={this.state.isEditorOpend} >
-                    <Popup.Header onClose={this.popupGoBack} title={this.getPopupTitle()} type="BACK" />
-                    <Popup.Content id="MusicDashboard">
-                        { this.state.selectedMusic == -2 ?
-                            <Library>
-                                <Library.Item onClick={() => this.setState({selectedMusic: -1, music: this.state.music})} iconSize={50} icon="plus" title="New"/>
-                                { this.state.musics.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() => this.setState({selectedMusic: i, music: this.state.musics[i]})} image={this.restMusic.GetImage(val.id)} title={val.name}/>) }
-                            </Library>:
-                            <>
-                                <ImageSelector ref={ this.coverFile } onChange={(img) => this.setState({musicCover: img})} image={this.state.musicCover != "" || this.state.music.id == -1 ? this.state.musicCover : this.restMusic.GetImage(this.state.music.id)} text="Cover"/>
-                                <Input onChange={(v) => { this.state.music.name = v; this.setState({music: this.state.music}) }} value={ this.state.music.name } label="Name"/>
-                                <TextArea onChange={(v) => { this.state.music.description = v; this.setState({music: this.state.music}) }} value={ this.state.music.description } label="Description"/>
-                                <MusicPlayer src={this.restMusic.GetFile(this.state.music.id, "music")} ref={ this.musicFile }/>
-                            </>
-                        }
-                    </Popup.Content>
-                    <Popup.Footer>
-                        { this.state.selectedMusic == -1 ? 
-                            <Popup.Footer.Button onClick={this.onCreateMusic} text="Create"/>:
-                            this.state.selectedMusic >= 0 ?
-                            <>
-                                <Popup.Footer.Button onClick={this.onUpdateMusic} text="Save"/>
-                                <Popup.Footer.Button onClick={this.onDeleteMusic} text="Delete"/>
-                            </>:<></>
-                        }
-                    </Popup.Footer>
-                </Popup>
-            </>
-        );
-    }
+    //#endregion
+
+    return (
+        <>
+            <Library>
+                { state.albums.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() => { setState({...state, isEditorOpend: true}), setSelectedAlbum(i) }} image={ restAlbum.GetImage(val.id) } title={val.name}/>) }
+            </Library>
+            <Popup isOpened={state.isEditorOpend} >
+                <Popup.Header onClose={popupGoBack} title={getPopupTitle()} type="BACK" />
+                <Popup.Content id="MusicDashboard">
+                    { selectedMusic == -2 ?
+                        <Library>
+                            <Library.Item onClick={() => { setState({...state, music: state.music}); setSelectedMusic(-1) } } iconSize={50} icon="plus" title="New"/>
+                            { state.musics.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() =>  { setState({...state, music: state.musics[i]}); setSelectedMusic(i);   }} image={restMusic.GetImage(val.id)} title={val.name}/>) }
+                        </Library>:
+                        <>
+                            <ImageSelector ref={ coverFile } onChange={(img) => setState({...state, musicCover: img})} image={state.musicCover != "" || state.music.id == -1 ? state.musicCover : restMusic.GetImage(state.music.id)} text="Cover"/>
+                            <Input onChange={(v) => { state.music.name = v; setState({...state, music: state.music}) }} value={ state.music.name } label="Name"/>
+                            <TextArea onChange={(v) => { state.music.description = v; setState({...state, music: state.music}) }} value={ state.music.description } label="Description"/>
+                            <MusicPlayer src={restMusic.GetFile(state.music.id, "music")} ref={ musicFile }/>
+                        </>
+                    }
+                </Popup.Content>
+                <Popup.Footer>
+                    { selectedMusic == -1 ? 
+                        <Popup.Footer.Button onClick={onCreateMusic} text="Create"/>:
+                        selectedMusic >= 0 ?
+                        <>
+                            <Popup.Footer.Button onClick={onUpdateMusic} text="Save"/>
+                            <Popup.Footer.Button onClick={onDeleteMusic} text="Delete"/>
+                        </>:<></>
+                    }
+                </Popup.Footer>
+            </Popup>
+        </>
+    );
 }
+
+export default MusicPage
