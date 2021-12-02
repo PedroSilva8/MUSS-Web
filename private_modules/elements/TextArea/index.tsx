@@ -9,23 +9,21 @@ export interface ITextAreaProps {
     onChange: (value: string) => void
 }
 
-export interface ITextAreaState { }
+const TextArea = (props: ITextAreaProps) => {
 
-export default class TextArea extends React.Component<ITextAreaProps, ITextAreaState> {
-
-    public static defaultProps = {
-        label: "",
-        value: "",
-        placeholder: "",
-        onChange: () => { }
-    };
-
-    render = () => {
-        return (
-            <div className="element-textarea">
-                { this.props.label != "" ? <span>{ this.props.label }</span> : <></> }
-                <textarea value={ this.props.value } onChange={(e) => { this.props.onChange(e.target.value) }} placeholder={ this.props.placeholder } />
-            </div>
-        );
-    }
+    return (
+        <div className="element-textarea">
+            { props.label != "" ? <span>{ props.label }</span> : <></> }
+            <textarea value={ props.value } onChange={(e) => { props.onChange(e.target.value) }} placeholder={ props.placeholder } />
+        </div>
+    );
 }
+
+TextArea.defaultProps = {
+    label: "",
+    value: "",
+    placeholder: "",
+    onChange: () => { }
+}
+
+export default TextArea

@@ -28,7 +28,7 @@ ReactDOM.render(
     <ReactNotification />
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<IndexPage />}/>
+        <Route path="/*" element={<IndexPage />}/>
         <Route path="/dashboard/*" element={<DashboardPage />}/>
       </Routes>
     </BrowserRouter>

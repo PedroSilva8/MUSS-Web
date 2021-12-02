@@ -9,23 +9,21 @@ export interface IInputProps {
     onChange: (value: string) => void
 }
 
-export interface IInputState { }
+const Input = (props: IInputProps) => {
 
-export default class Input extends React.Component<IInputProps, IInputState> {
-
-    public static defaultProps = {
-        label: "",
-        value: "",
-        placeholder: "",
-        onChange: () => { }
-    };
-
-    render = () => {
-        return (
-            <div className="element-input">
-                { this.props.label != "" ? <span>{ this.props.label }</span> : <></> }
-                <input value={this.props.value} onChange={(e) => { this.props.onChange(e.target.value) }} placeholder={this.props.placeholder}/>
-            </div>
-        );
-    }
+    return (
+        <div className="element-input">
+            { props.label != "" ? <span>{ props.label }</span> : <></> }
+            <input value={props.value} onChange={(e) => { props.onChange(e.target.value) }} placeholder={props.placeholder}/>
+        </div>
+    );
 }
+
+Input.defaultProps = {
+    label: "",
+    value: "",
+    placeholder: "",
+    onChange: () => { }
+};
+
+export default Input

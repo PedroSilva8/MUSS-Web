@@ -15,7 +15,26 @@ body, #root {
 
 #content {
     width: 100vw;
-    height: calc(100vh - 50px);
+    height: calc(100vh - 94px);
     display: flex;
     flex-direction: row;
+}
+
+* {
+  scrollbar-width: none;
+  scrollbar-color: #8f54a0 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #8f54a0;
+  border-radius: 0px;
+  border: 0px solid transparent;
 }

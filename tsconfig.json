@@ -19,7 +19,8 @@
           "@scss/*": [ "src/scss/*" ],
           "@customModules/*": [ "src/custom_modules/*" ],
           "@customElements/*": [ "src/custom_elements/*" ],
-          "@interface/*": [ "src/interface/*" ]
+          "@interface/*": [ "src/interface/*" ],
+          "@context/*": [ "src/context/*" ]
         }
     },
     "include": [

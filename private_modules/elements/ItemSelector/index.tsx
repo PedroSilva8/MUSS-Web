@@ -39,7 +39,7 @@ export default class ItemSelector<T extends { [index: string] : any } > extends 
     render = () => {
         return (
             <div className="element-item-selector">
-                {this.state.items.map((val : any) => <ImageSelector image={this.rest.GetImage(val["id"])} onClick={() => { this.props.onSelect(val["id"]) }} text={(val[this.props.textColumn] ? val[this.props.textColumn] : "")}/>)}
+                {this.state.items.map((val : any, i) => <ImageSelector key={i} image={this.rest.GetImage(val["id"])} onClick={() => { this.props.onSelect(val["id"]) }} text={(val[this.props.textColumn] ? val[this.props.textColumn] : "")}/>)}
             </div>
         );
     }

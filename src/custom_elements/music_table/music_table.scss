@@ -1,0 +1,47 @@
+.music-table {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+
+    > .music-table-header {
+        display: flex;
+        flex-direction: row;
+
+        > span {
+            margin: 5px;
+            padding: 10px;
+        }
+
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 10px;
+    }
+
+    > .music-table-rows {
+        display: flex;
+        flex-direction: column;
+
+        > .music-table-row {
+            display: flex;
+            flex-direction: row;
+            border-bottom: 1px solid transparent;
+            transition: var(--default-transition);
+
+            > span {
+                height: 20px;
+                margin: 5px;
+                padding: 10px;
+            }
+
+            &:hover {
+                border-radius: 5px;
+                cursor: pointer;
+                background-color: var(--surface);
+                border-bottom-color: var(--border);
+            }
+        }
+    }
+
+    > div .music-table-grow {
+        flex: 1;
+    }
+}
