@@ -8,6 +8,7 @@ import TreeView from '@elements/TreeView'
 import ArtistPage from "./dashboard/artist"
 import AlbumPage from "./dashboard/album"
 import MusicPage from "./dashboard/music"
+import UsersPage from "./dashboard/users";
 
 export default () => {
     const navegate = useNavigate();
@@ -34,7 +35,7 @@ export default () => {
                         <TreeView.Header.Option icon="music-note" onClick={() => navegate("/dashboard/music") } content="Music"/>
                     </TreeView.Header>
                     <TreeView.Header title="Settings">
-                        <TreeView.Header.Option icon="account" content="Users"/>
+                        <TreeView.Header.Option icon="account" onClick={() => navegate("/dashboard/users") } content="Users"/>
                         <TreeView.Header.Option icon="cog-outline" content="General"/>
                     </TreeView.Header>
                 </TreeView>
@@ -44,6 +45,7 @@ export default () => {
                     <Route path={"/artist/*"} element={<ArtistPage />}/>
                     <Route path={"/album/*"} element={<AlbumPage />}/>
                     <Route path={"/music/*"} element={<MusicPage />}/>
+                    <Route path={"/users/*"} element={<UsersPage />}/>
                 </Routes>
             </div>
         </>

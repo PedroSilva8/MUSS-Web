@@ -27,4 +27,14 @@ export interface IMusic {
 
 const defaultIMusic : IMusic = { id: -1, album_id: -1, name: "", description: "", length: "00:00:00" }
 
-export { defaultIMusic }
+export interface IUser {
+    [key: string]: any;
+    id: number
+    name: string
+    password: string
+    isAdmin: boolean
+}
+
+const defaultUser : IUser = { id: -1, name: "", password: "", isAdmin: false }
+
+export { defaultIMusic, defaultUser }

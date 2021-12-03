@@ -61,9 +61,9 @@ const AlbumPage = () => {
     const createAlbum = () => {
         if (state.editorImage != "") {
             imageFile.current.getImage((image) =>
-                rest.Create({
+                rest.CreateWFiles({
                     data: state.album,
-                    file: image,
+                    files: { file: image },
                     onSuccess: (Data) => {
                         state.albums.push(Data)
                         setState({...state, albums: state.albums, editorImage: "", isEditorOpend: false})
@@ -143,7 +143,7 @@ const AlbumPage = () => {
     return (
         <>
             <Library>
-                <Library.Item onClick={() => { unSelectAlbum(); setEditor(true) }} icon="plus" title="New" />
+                <Library.Item onClick={() => { unSelectAlbum(); setEditor(true) }} iconSize={100} placeholderIcon="plus" icon="plus" title="New" />
                 { state.albums.map((val, index) => <Library.Item key={index} onClick={() => { selectAlbum(index); setEditor(true) }} iconSize={50} icon="play" image={ rest.GetImage(val.id) } title={ val.name }/> ) }
             </Library>
             <Popup isOpened={state.isEditorOpend} >

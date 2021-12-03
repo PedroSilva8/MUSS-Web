@@ -180,7 +180,7 @@ const MusicPage = () => {
                 <Popup.Content id="MusicDashboard">
                     { selectedMusic == -2 ?
                         <Library>
-                            <Library.Item onClick={() => { setState({...state, music: state.music}); setSelectedMusic(-1) } } iconSize={50} icon="plus" title="New"/>
+                            <Library.Item onClick={() => { setState({...state, music: state.music}); setSelectedMusic(-1) } } iconSize={100} placeholderIcon="plus" icon="plus" title="New"/>
                             { state.musics.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() =>  { setState({...state, music: state.musics[i]}); setSelectedMusic(i);   }} image={restMusic.GetImage(val.id)} title={val.name}/>) }
                         </Library>:
                         <>
