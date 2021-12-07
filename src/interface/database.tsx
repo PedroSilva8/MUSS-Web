@@ -1,8 +1,3 @@
-export interface IMusicContext {
-    music: IMusic
-    setMusic?: (music: IMusic) => void
-}
-
 export interface IArtist {
     id: number
     name: string

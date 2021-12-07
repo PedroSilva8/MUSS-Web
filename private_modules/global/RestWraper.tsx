@@ -2,7 +2,9 @@ import Networking from "@global/Networking";
 import RestHelper, { RestResponse } from "@global/RestHelper"
 
 export interface IGet<T> {
-    index: number
+    index?: number
+    arguments?: { [key: string]: string; }
+    additional?: string
     onSuccess: (Data: T) => void
     onError: (Data: RestResponse) => void
 }
@@ -83,12 +85,19 @@ export default class RestWraper<T> {
     }
 
     Get = (props:IGet<T>) => {
-        RestHelper.GetItemData({
-            id: props.index,
-            target: this.Target,
-            onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
-            onError: props.onError
-        });
+        if (props.index)
+            RestHelper.GetItemData({
+                id: props.index,
+                target: this.Target + (props.additional ? props.additional : ""),
+                onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
+                onError: props.onError
+            });
+        else
+            RestHelper.GetItems({
+                target: this.Target + (props.additional ? props.additional : ""),
+                onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
+                onError: props.onError
+            })
     }
 
     GetAll = (props:IGetAll<T>) => {

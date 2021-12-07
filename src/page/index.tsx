@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom"
 
 import Header from '@elements/Header'
@@ -8,17 +8,28 @@ import FeedPage from "./user/feed"
 import AlbumDisplayPage from "./user/albumDispaly";
 import MusicPlayer from "@elements/MusicPlayer";
 
-import './scss/index.scss'
 import musicContext, { defaultMusicContex } from "@context/MusicContext";
-import { IMusic, IMusicContext } from "@interface/database";
-import RestWraper from "@modules/global/RestWraper";
+import { IMusic } from "@interface/database";
+import RestWraper from "@global/RestWraper";
+import userContext from "@context/AuthContext";
 
-
+import './scss/index.scss'
+import Cookies from "js-cookie";
 
 export default () => {
     const navegate = useNavigate();
     var restMusic = new RestWraper<IMusic>("music")
     const [ music, setMusic ] = useState<IMusic>(defaultMusicContex.music)
+    const { token, setToken } = useContext(userContext)
+    const navigate = useNavigate()
+
+    if (token == "")
+        navigate("/auth")
+
+    const Logout = () => {
+        Cookies.set('auth', "")
+        setToken("")
+    }
 
     return (
         <>
@@ -32,6 +43,7 @@ export default () => {
                 <Header.Chunk id="header-chunck-right">
                     <Icon icon="account" canHover={true}/>
                     <Icon onClick={() => navegate("/dashboard") } icon="view-dashboard" canHover={true}/>
+                    <Icon onClick={Logout} icon="logout" canHover={true}/>
                 </Header.Chunk>
             </Header>
             <musicContext.Provider value={{music: music, setMusic: (music) => { setMusic(music) }}}>

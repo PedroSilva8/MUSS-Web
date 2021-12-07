@@ -1,9 +1,16 @@
 .element-input {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-
+    justify-content: center;
+    align-items: flex-start;
     height: 3em;
+
+    &.row {
+        flex-direction: row;
+    }
+
+    &.column {
+        flex-direction: column;
+    }
 
     > span {
         margin-right: 10px;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Route, Routes, useNavigate } from 'react-router-dom'
 
 import Header from '@elements/Header'
@@ -9,10 +9,15 @@ import ArtistPage from "./dashboard/artist"
 import AlbumPage from "./dashboard/album"
 import MusicPage from "./dashboard/music"
 import UsersPage from "./dashboard/users";
+import userContext from "@context/AuthContext";
 
 export default () => {
     const navegate = useNavigate();
+    const { token } = useContext(userContext)
     
+    if (token == "")
+        navegate("/auth")
+
     return (
         <>
             <Header>
