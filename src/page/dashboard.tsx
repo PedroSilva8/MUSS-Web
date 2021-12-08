@@ -1,37 +1,33 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Routes, useNavigate } from 'react-router-dom'
 
-import Header from '@elements/Header'
-import Icon from '@elements/Icon'
 import TreeView from '@elements/TreeView'
+
+import userContext from "@context/AuthContext";
 
 import ArtistPage from "./dashboard/artist"
 import AlbumPage from "./dashboard/album"
 import MusicPage from "./dashboard/music"
 import UsersPage from "./dashboard/users";
-import userContext from "@context/AuthContext";
+import PageHeader from "./pageHeader";
 
 export default () => {
     const navegate = useNavigate();
-    const { token } = useContext(userContext)
+    const { token, user } = useContext(userContext)
     
-    if (token == "")
-        navegate("/auth")
+    useEffect(() => {
+        if (token == "")
+            navegate("/auth")
+    }, [token])
+
+    useEffect(() => {
+        if (!user.isAdmin)
+            navegate("/")
+    }, [user])
 
     return (
         <>
-            <Header>
-                <Header.Chunk id="header-chunck-left">
-                    <Icon onClick={() => navegate("/") } icon="home" canHover={true}/>
-                </Header.Chunk>
-                <Header.Chunk id="header-chunck-center" isMaxed={true}>
-                    
-                </Header.Chunk>
-                <Header.Chunk id="header-chunck-right">
-                    <Icon icon="account" canHover={true}/>
-                    <Icon icon="view-dashboard" canHover={true}/>
-                </Header.Chunk>
-            </Header>
+            <PageHeader/>
             <div id="content">
                 <TreeView>
                     <TreeView.Header title="Library">

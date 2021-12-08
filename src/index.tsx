@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import ReactNotification from 'react-notifications-component'
 
 import IndexPage from './page';
@@ -12,9 +12,11 @@ import Themehandler from '@global/ThemeHandler'
 import { defaultUser, IUser } from '@interface/database';
 import userContext from '@context/AuthContext';
 
+import Cookies from 'js-cookie';
+import RestHelper from '@global/RestHelper';
+
 import './scss/index.scss'
 import 'react-notifications-component/dist/scss/notification.scss'
-import Cookies from 'js-cookie';
 
 Themehandler.Themes.push({
   name: "dark",
@@ -33,8 +35,22 @@ const App = () => {
   const [ token, setToken ] = useState<string>("")
 
   useEffect(() => {
-    setToken(Cookies.get('auth'))
+    var auth = Cookies.get('auth')
+    setToken(auth ? auth : "")
   }, [])
+
+  useEffect(() => {
+    if (token && token != "")
+      RestHelper.GetItems({
+        target: "user/token",
+        arguments: { token: token },
+        onSuccess: (Data) => {
+          if (Data.data)
+            setUser(Data.data)
+        },
+        onError: () => {}
+      })
+  }, [token])
 
   return (
     <>

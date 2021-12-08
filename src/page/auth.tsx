@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { sha256 } from "js-sha256";
 
@@ -25,8 +25,10 @@ export default () => {
     const navigate = useNavigate()
     
     /* Check If Logged */
-    if (token != "")
-        navigate("/")
+    useEffect(() => {
+        if (token != "")
+            navigate("/")
+    }, [])
 
     const Login = () => {
         RestHelper.GetItems({
