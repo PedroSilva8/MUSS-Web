@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react"
 
 import Library from '@elements/Library'
 import Popup from '@elements/Popup'
@@ -7,11 +7,12 @@ import TextArea from '@elements/TextArea'
 import ImageSelector from '@elements/ImageSelector'
 import ItemSelector from '@elements/ItemSelector'
 
-import RestWraper from "@global/RestWraper";
-
-import { IAlbum, IArtist } from "@interface/database";
-
+import RestWraper from "@global/RestWraper"
 import NotificationManager from '@global/NotificationManager'
+
+import { IAlbum, IArtist } from "@interface/database"
+
+import userContext from "@context/AuthContext"
 
 import './scss/album.scss'
 
@@ -28,7 +29,8 @@ export interface IAlbumState {
 }
 
 const AlbumPage = () => {
-
+    
+    const { token } = useContext(userContext)
     const [state, setState] = useState<IAlbumState>({ 
         album: { 
             id: -1, 
@@ -53,6 +55,7 @@ const AlbumPage = () => {
 
     const getAlbum = () => {
         rest.GetAll({
+            token: token,
             onSuccess: (Data) => setState({...state, albums: Data }),
             onError: () => NotificationManager.Create("Error", "Error Getting Artists", 'danger')
         })
@@ -61,9 +64,10 @@ const AlbumPage = () => {
     const createAlbum = () => {
         if (state.editorImage != "") {
             imageFile.current.getImage((image) =>
-                rest.Create({
+                rest.CreateWFiles({
                     data: state.album,
-                    file: image,
+                    token: token,
+                    files: { file: image },
                     onSuccess: (Data) => {
                         state.albums.push(Data)
                         setState({...state, albums: state.albums, editorImage: "", isEditorOpend: false})
@@ -82,6 +86,7 @@ const AlbumPage = () => {
         rest.Update({
             index: state.album.id,
             data: state.album,
+            token: token,
             onSuccess: (data) => {
                 NotificationManager.Create("Success", "Successfull Update", 'success')
                 state.albums[state.albumIndex] = state.album
@@ -95,6 +100,7 @@ const AlbumPage = () => {
                 rest.UpdateImage({
                     index: state.album.id,
                     file: image,
+                    token: token,
                     onSuccess: () => { },
                     onError: (data) => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
                 }),
@@ -105,6 +111,7 @@ const AlbumPage = () => {
     const deleteAlbum = () => {
         rest.Delete({
             index: state.album.id,
+            token: token,
             onSuccess: () => {
                 state.albums.splice(state.albumIndex, 1)
                 setState({...state, albums: state.albums, isEditorOpend: false, albumIndex: -1, editorImage: ""})
@@ -143,7 +150,7 @@ const AlbumPage = () => {
     return (
         <>
             <Library>
-                <Library.Item onClick={() => { unSelectAlbum(); setEditor(true) }} icon="plus" title="New" />
+                <Library.Item onClick={() => { unSelectAlbum(); setEditor(true) }} iconSize={100} placeholderIcon="plus" icon="plus" title="New" />
                 { state.albums.map((val, index) => <Library.Item key={index} onClick={() => { selectAlbum(index); setEditor(true) }} iconSize={50} icon="play" image={ rest.GetImage(val.id) } title={ val.name }/> ) }
             </Library>
             <Popup isOpened={state.isEditorOpend} >

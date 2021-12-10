@@ -1,31 +1,33 @@
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Route, Routes, useNavigate } from 'react-router-dom'
 
-import Header from '@elements/Header'
-import Icon from '@elements/Icon'
 import TreeView from '@elements/TreeView'
+
+import userContext from "@context/AuthContext";
 
 import ArtistPage from "./dashboard/artist"
 import AlbumPage from "./dashboard/album"
 import MusicPage from "./dashboard/music"
+import UsersPage from "./dashboard/users";
+import PageHeader from "./pageHeader";
 
 export default () => {
     const navegate = useNavigate();
+    const { token, user } = useContext(userContext)
     
+    useEffect(() => {
+        if (token == "")
+            navegate("/auth")
+    }, [token])
+
+    useEffect(() => {
+        if (!user.isAdmin)
+            navegate("/")
+    }, [user])
+
     return (
         <>
-            <Header>
-                <Header.Chunk id="header-chunck-left">
-                    <Icon onClick={() => navegate("/") } icon="home" canHover={true}/>
-                </Header.Chunk>
-                <Header.Chunk id="header-chunck-center" isMaxed={true}>
-                    
-                </Header.Chunk>
-                <Header.Chunk id="header-chunck-right">
-                    <Icon icon="account" canHover={true}/>
-                    <Icon icon="view-dashboard" canHover={true}/>
-                </Header.Chunk>
-            </Header>
+            <PageHeader/>
             <div id="content">
                 <TreeView>
                     <TreeView.Header title="Library">
@@ -34,7 +36,7 @@ export default () => {
                         <TreeView.Header.Option icon="music-note" onClick={() => navegate("/dashboard/music") } content="Music"/>
                     </TreeView.Header>
                     <TreeView.Header title="Settings">
-                        <TreeView.Header.Option icon="account" content="Users"/>
+                        <TreeView.Header.Option icon="account" onClick={() => navegate("/dashboard/users") } content="Users"/>
                         <TreeView.Header.Option icon="cog-outline" content="General"/>
                     </TreeView.Header>
                 </TreeView>
@@ -44,6 +46,7 @@ export default () => {
                     <Route path={"/artist/*"} element={<ArtistPage />}/>
                     <Route path={"/album/*"} element={<AlbumPage />}/>
                     <Route path={"/music/*"} element={<MusicPage />}/>
+                    <Route path={"/users/*"} element={<UsersPage />}/>
                 </Routes>
             </div>
         </>

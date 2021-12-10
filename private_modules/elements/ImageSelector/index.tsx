@@ -7,6 +7,8 @@ export interface IImageSelectorProps {
     icon: string
     iconSize: number
     image: string
+    placeholderIcon: string
+    placeholderIconSize: number
     text: string
     onChange: (image: string) => void
     onClick?: () => void
@@ -23,7 +25,9 @@ export default class ImageSelector extends React.Component<IImageSelectorProps, 
         iconSize: 24,
         image: "",
         onChange: () => { },
-        text: ""
+        placeholderIcon: "",
+        text: "",
+        placeholderIconSize: 100
     };
 
     onClick = () => this.props.onClick ? this.props.onClick() : this.imageFile.current.click()
@@ -50,7 +54,10 @@ export default class ImageSelector extends React.Component<IImageSelectorProps, 
         return (
             <div className="element-image-selector" onClick={ this.onClick }>
                 <div className="element-image">
-                    <img src={ this.props.image }/>
+                    { this.props.image == "" ? 
+                        <Icon icon={ this.props.placeholderIcon } fontSize={this.props.placeholderIconSize}/>:
+                        <img src={ this.props.image }/> 
+                    }
                     <input type='file' accept="image/*" onChange={this.onChange} ref={ this.imageFile } style={{display: 'none'}}/>
                     <div className="element-image-overlay"><Icon fontSize={ this.props.iconSize } icon={ this.props.icon }/></div>
                 </div>

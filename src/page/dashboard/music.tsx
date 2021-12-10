@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 
 import Library from '@elements/Library'
 import Popup from '@elements/Popup'
@@ -13,6 +13,7 @@ import RestWraper from "@global/RestWraper"
 
 import './scss/music.scss'
 import NotificationManager from "@global/NotificationManager";
+import userContext from "@context/AuthContext";
 
 
 export interface IMusicState {
@@ -26,6 +27,7 @@ export interface IMusicState {
 }
 
 const MusicPage = () => {
+    const { token } = useContext(userContext)
     const [state, setState] = useState<IMusicState>({ 
         isEditorOpend: false,
         musicCover: "",
@@ -64,6 +66,7 @@ const MusicPage = () => {
                 music: music,
                 cover: cover
             },
+            token: token,
             onSuccess: () => {
                 NotificationManager.Create("Success", "Success Creating Music", 'success')
                 onLoadAlbum()
@@ -97,6 +100,7 @@ const MusicPage = () => {
         musicFile.current.getMusic(
             (music) => restMusic.UpdateFile({
                 index: state.music.id, 
+                token: token,
                 files: { music: music }, 
                 onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
                 onError: () => NotificationManager.Create("Error", "Error Updating Music File", 'danger') 
@@ -107,6 +111,7 @@ const MusicPage = () => {
         coverFile.current.getImage(
             (cover) => restMusic.UpdateFile({
                 index: state.music.id, 
+                token: token,
                 files: { image: cover }, 
                 onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
                 onError: () => NotificationManager.Create("Error", "Error Updating Music Cover File", 'danger') 
@@ -116,6 +121,7 @@ const MusicPage = () => {
 
         restMusic.Update({
             index: state.music.id,
+            token: token,
             data: state.music,
             onSuccess: () => NotificationManager.Create("Success", "Success Updating Music", 'success'),
             onError: () => NotificationManager.Create("Error", "Error Updating Music", 'danger')
@@ -125,6 +131,7 @@ const MusicPage = () => {
     const onDeleteMusic = () => {
         restMusic.Delete({
             index: state.music.id,
+            token: token,
             onSuccess: () => { 
                 NotificationManager.Create("Success", "Success Deleting Music", 'success')
                 state.musics.splice(selectedMusic, 1)
@@ -141,6 +148,7 @@ const MusicPage = () => {
         if (selectedAlbum == -1)
             return;
         restMusic.GetWhere({
+            token: token,
             arguments: {
                 album_id: state.albums[selectedAlbum].id.toString()
             },
@@ -180,7 +188,7 @@ const MusicPage = () => {
                 <Popup.Content id="MusicDashboard">
                     { selectedMusic == -2 ?
                         <Library>
-                            <Library.Item onClick={() => { setState({...state, music: state.music}); setSelectedMusic(-1) } } iconSize={50} icon="plus" title="New"/>
+                            <Library.Item onClick={() => { setState({...state, music: state.music}); setSelectedMusic(-1) } } iconSize={100} placeholderIcon="plus" icon="plus" title="New"/>
                             { state.musics.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() =>  { setState({...state, music: state.musics[i]}); setSelectedMusic(i);   }} image={restMusic.GetImage(val.id)} title={val.name}/>) }
                         </Library>:
                         <>

@@ -25,6 +25,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
 
     audioFile = React.createRef<HTMLInputElement>() 
     audio: HTMLAudioElement = new Audio()
+    isUnmounting = false
 
     public static defaultProps = {
         src: "",
@@ -40,11 +41,14 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     componentDidMount = () => {            
         this.audio.ontimeupdate = this.onAudioProgress
         this.audio.onloadeddata = this.onAudioLoad
-        this.audio.oncanplaythrough = () => { this.audio.play(); this.setState({isPlaying: true}) }
+        this.audio.oncanplaythrough = () => this.audio.play()
+        this.audio.onplay = () =>  this.setState({isPlaying: true})
+        this.audio.onpause = () =>  this.isUnmounting ? () => {} : this.setState({isPlaying: false})
         this.audio.src = this.props.src
     }
 
     componentWillUnmount = () => {
+        this.isUnmounting = true
         this.audio.pause()
         delete this.audio
     }
@@ -67,7 +71,8 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     }
 
     onAudioProgress = (e: ProgressEvent<EventTarget>) => {
-        this.setState({playerSlider: this.audio.currentTime * 1000})
+        if (this.audio)
+            this.setState({playerSlider: this.audio.currentTime * 1000})
     }
 
     onAudioSliderChange = (val: number) => {
@@ -77,7 +82,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     }
 
     changeAudioState = () => {
-        this.state.isPlaying ? this.audio.play() : this.audio.pause()
+        this.state.isPlaying ? this.audio.pause() : this.audio.play()
     }
 
     onAudioChange = (val: number) => {
