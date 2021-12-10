@@ -1,14 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react"
 
 import Library from '@elements/Library'
 import Popup from '@elements/Popup'
 import Input from '@elements/Input'
 import ImageSelector from '@elements/ImageSelector'
 
-import { IArtist } from "@interface/database";
+import { IArtist } from "@interface/database"
 
-import RestWraper from "@global/RestWraper";
+import userContext from "@context/AuthContext"
 
+import RestWraper from "@global/RestWraper"
 import NotificationManager from '@global/NotificationManager'
 
 import './scss/artist.scss'
@@ -24,6 +25,7 @@ export interface IArtistState {
 
 const ArtistPage = () => {
 
+    const { token } = useContext(userContext)
     const [state, setState] = useState<IArtistState>({ 
         artist: { 
             id: -1,
@@ -46,6 +48,7 @@ const ArtistPage = () => {
 
     const getArtists = () => {
         rest.GetAll({
+            token: token,
             onSuccess: (artists) => setState({...state, artists }),
             onError: () => NotificationManager.Create("Error", "Error Getting Artists", 'danger')
         })
@@ -56,6 +59,7 @@ const ArtistPage = () => {
             imageFile.current.getImage((image) =>
                 rest.CreateWFiles({
                     data: state.artist,
+                    token: token,
                     files: { file: image },
                     onSuccess: (artist) => {
                         state.artists.push(artist)
@@ -75,6 +79,7 @@ const ArtistPage = () => {
         rest.Update({
             index: state.artist.id,
             data: state.artist,
+            token: token,
             onSuccess: () => {
                 NotificationManager.Create("Success", "Successfull Update", 'success')
                 state.artists[state.artistIndex] = state.artist
@@ -88,6 +93,7 @@ const ArtistPage = () => {
                 rest.UpdateImage({
                     index: state.artist.id,
                     file: image,
+                    token: token,
                     onSuccess: () => { },
                     onError: () => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
                 }),
@@ -98,6 +104,7 @@ const ArtistPage = () => {
     const deleteArtist = () => {
         rest.Delete({
             index: state.artist.id,
+            token: token,
             onSuccess: () => {
                 state.artists.splice(state.artistIndex, 1)
                 setState({...state, artists: state.artists, isEditorOpend: false, artistIndex: -1, editorImage: ""})

@@ -1,5 +1,4 @@
-import React, { useEffect } from "react"
-
+import React, { useContext, useEffect } from "react"
 
 import { defaultUser, IUser } from "@interface/database"
 
@@ -11,6 +10,8 @@ import Popup from "@elements/Popup"
 import Input from "@elements/Input"
 import Switch from "@elements/Switch"
 
+import userContext from "@context/AuthContext"
+
 interface IUsersPageState {
     users: IUser[]
     user: IUser
@@ -21,7 +22,8 @@ interface IUsersPageState {
 }
 
 const UsersPage = () => {
-
+    const { token } = useContext(userContext)
+    
     const [ state, setState ] = React.useState<IUsersPageState>({
         users: [],
         user: defaultUser,
@@ -34,6 +36,7 @@ const UsersPage = () => {
     var restUser = new RestWraper<IUser>('user')
 
     useEffect(() => restUser.GetAll({
+        token: token,
         onSuccess: (users) => setState({...state, users}),
         onError: () => NotificationManager.Create('Error', "Failed Getting Users", 'danger')
     }), [])
@@ -53,6 +56,7 @@ const UsersPage = () => {
         setState({...state, user: state.user})
 
         restUser.Create({
+            token: token,
             data: state.user,
             onSuccess: (data) => { NotificationManager.Create('Success', 'Successfully Created User', 'success'); state.users.push(data); setState({...state, users: state.users}); popupGoBack() },
             onError: () => NotificationManager.Create('Error', "Failed Creating User", 'danger')
@@ -62,6 +66,7 @@ const UsersPage = () => {
     const onSaveUser = () => {
         restUser.Update({
             index: state.user.id,
+            token: token,
             data: state.user,
             onSuccess: () => { NotificationManager.Create('Success', 'Successfully Updated User', 'success'); state.users[state.selectedUser] = state.user; setState({...state, users: state.users}) },
             onError: (err) => NotificationManager.Create('Error', "Failed Updating User - " + err.data, 'danger')
@@ -71,6 +76,7 @@ const UsersPage = () => {
     const onDeleteUser = () => {
         restUser.Delete({
             index: state.user.id,
+            token: token,
             onSuccess: () => { NotificationManager.Create('Success', 'Successfully Updated User', 'success'); state.users.splice(state.selectedUser, 1); setState({...state, users: state.users, isEditorOpend: false, selectedUser: -1}); popupGoBack() },
             onError: (err) => NotificationManager.Create('Error', "Failed Deliting User - " + err.data, 'danger')
         })

@@ -2,6 +2,7 @@ import Networking from "@global/Networking";
 import RestHelper, { RestResponse } from "@global/RestHelper"
 
 export interface IGet<T> {
+    token?: string
     index?: number
     arguments?: { [key: string]: string; }
     additional?: string
@@ -10,32 +11,37 @@ export interface IGet<T> {
 }
 
 export interface IGetAll<T> {
+    token?: string
     custom?: string
     onSuccess: (Data: T[]) => void
     onError: (Data: RestResponse) => void
 }
 
 export interface IGetWhere<T> {
+    token?: string
     arguments?: { [key: string]: string; }
     onSuccess: (Data: T[]) => void
     onError: (Data: RestResponse) => void
 }
 
 export interface IUpdate<T> {
+    token?: string
     index: number
     data: T
     onSuccess: (Data: RestResponse) => void
     onError: (Data: RestResponse) => void
 }
 
-export interface IUpdateFile<T> {
+export interface IUpdateFile {
+    token?: string
     index: number
     files: { [key: string]: string; }
     onSuccess: () => void
     onError: (Data: RestResponse) => void
 }
 
-export interface IUpdateImage<T> {
+export interface IUpdateImage {
+    token?: string
     index: number
     file: string
     onSuccess: () => void
@@ -43,19 +49,22 @@ export interface IUpdateImage<T> {
 }
 
 export interface ICreate<T> {
+    token?: string
     data: T
     onSuccess: (Data: T) => void
     onError: (Data: RestResponse) => void
 }
 
 export interface ICreateWFiles<T> {
+    token?: string
     data: T
     files: { [key: string]: string; }
     onSuccess: (Data: T) => void
     onError: (Data: RestResponse) => void
 }
 
-export interface IDelete<T> {
+export interface IDelete {
+    token?: string
     index: number
     onSuccess: () => void
     onError: (Data: RestResponse) => void
@@ -89,11 +98,13 @@ export default class RestWraper<T> {
             RestHelper.GetItemData({
                 id: props.index,
                 target: this.Target + (props.additional ? props.additional : ""),
+                arguments: { token: props.token },
                 onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
                 onError: props.onError
             });
         else
             RestHelper.GetItems({
+                arguments: { token: props.token },
                 target: this.Target + (props.additional ? props.additional : ""),
                 onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
                 onError: props.onError
@@ -103,6 +114,7 @@ export default class RestWraper<T> {
     GetAll = (props:IGetAll<T>) => {
         RestHelper.GetItems({
             target: this.Target + (props.custom ? props.custom : ""),
+            arguments: { token: props.token },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)),
             onError: props.onError
         });
@@ -111,7 +123,7 @@ export default class RestWraper<T> {
     GetWhere = (props:IGetWhere<T>) => {
         RestHelper.GetItems({
             target: this.Target,
-            arguments: props.arguments,
+            arguments: { ...props.arguments, ...(props.token && { token: props.token } ) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)),
             onError: props.onError
         });
@@ -121,26 +133,28 @@ export default class RestWraper<T> {
         RestHelper.UpdateItems({
             id: props.index,
             target: this.Target,
-            Values: props.data,
+            Values: { ...props.data, ...(props.token && { token: props.token } ) },
             onSuccess: props.onSuccess,
             onError: props.onError
         })
     }
 
-    UpdateFile = (props:IUpdateFile<T>) => {
+    UpdateFile = (props:IUpdateFile) => {
         RestHelper.UpdateFile({
             id: props.index,
             target: this.Target,
+            arguments: { ...(props.token && { token: props.token } ) },
             fileData: props.files,
             onSuccess: (data) => props.onSuccess(),
             onError: props.onError
         })
     }
 
-    UpdateImage = (props:IUpdateImage<T>) => {
+    UpdateImage = (props:IUpdateImage) => {
         RestHelper.UpdateFile({
             id: props.index,
             target: this.Target,
+            arguments: { ...(props.token && { token: props.token } ) },
             fileData: { image: props.file },
             onSuccess: (data) => props.onSuccess(),
             onError: props.onError
@@ -150,7 +164,7 @@ export default class RestWraper<T> {
     Create = (props:ICreate<T>) => {
         RestHelper.CreateItem({
             target: this.Target,
-            Values: props.data,
+            Values: { ...props.data, ...(props.token && { token: props.token } ) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
             onError: props.onError
         })
@@ -173,16 +187,17 @@ export default class RestWraper<T> {
     CreateWFiles = (props:ICreateWFiles<T>) => {
         RestHelper.CreateItem({
             target: this.Target,
-            Values: { ...props.data, ...props.files },
+            Values: { ...props.data, ...props.files, ...(props.token && { token: props.token } ) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
             onError: props.onError
         })
     }
 
-    Delete = (props:IDelete<T>) => {
+    Delete = (props:IDelete) => {
         RestHelper.DeleteItem({
             target: this.Target,
             id: props.index,
+            arguments: { ...(props.token && { token: props.token } ) },
             onSuccess: props.onSuccess,
             onError: props.onError
         })

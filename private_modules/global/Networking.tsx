@@ -14,6 +14,7 @@ interface ISendRequestProps {
 interface ISendFiles {
     url: string
     uploadType: 'POST' | 'PUT'
+    data?: any
     file: string
     onSuccess?:(data: any) => void
     onError?:(data: any) => void
@@ -48,22 +49,9 @@ export default class Networking {
     }
 
     static sendFile = (props: ISendFiles) : void => {
-        //this.asyncFileToArgument({
-        //    file: props.file,
-        //    onSucess: (file) => {
-        //        Networking.sendRequest({
-        //            url: props.url,
-        //            data: { file: file },
-        //            type: props.uploadType,
-        //            onSuccess: props.onSuccess,
-        //            onError: props.onError
-        //        })
-        //    },
-        //    onError: props.onError
-        //})
         Networking.sendRequest({
             url: props.url,
-            data: { file: props.file },
+            data: {...{ file: props.file }, ...props.data },
             type: props.uploadType,
             onSuccess: props.onSuccess,
             onError: props.onError

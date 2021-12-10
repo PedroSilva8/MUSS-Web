@@ -18,6 +18,7 @@ export interface IGetItems {
 export interface IGetItemData {
     target: string
     id: IndexKind
+    arguments?: any
     onSuccess: (Data: RestResponse) => void
     onError: (Data: RestResponse) => void
 }
@@ -42,6 +43,7 @@ export interface IUpdateFile {
     target: string
     id: IndexKind
     fileData: { [key: string]: string; }
+    arguments?: any
     onSuccess?: (Data: RestResponse) => void
     onError?: (Data: RestResponse) => void
 }
@@ -49,6 +51,7 @@ export interface IUpdateFile {
 export interface IDeleteItem {
     target: string
     id: IndexKind
+    arguments?: any
     onSuccess?: (Data: RestResponse) => void
     onError?: (Data: RestResponse) => void
 }
@@ -124,6 +127,7 @@ export default class RestHelper {
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}/${props.id}`,
             type: 'GET',
+            data: props.arguments,
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
                 if (!Response.isValid || Response.status != 0) {
@@ -173,6 +177,7 @@ export default class RestHelper {
             Networking.sendFile({
                 url: `${RestHelper.baseURL}${props.target}/${props.id}/${key}`,
                 uploadType: 'PUT',
+                data: props.arguments,
                 file: props.fileData[key],
                 onSuccess: (Data) => {
                     var Response = RestHelper.DataToResponse(Data);
@@ -194,6 +199,7 @@ export default class RestHelper {
     static DeleteItem = (props:IDeleteItem) => {
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}/${props.id}`,
+            data: props.arguments,
             type: 'DELETE',
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
