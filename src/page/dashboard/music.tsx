@@ -23,6 +23,9 @@ export interface IMusicState {
     musics: IMusic[]
     albums: IAlbum[]
 
+    albumPage: number
+    albumLastPage: number
+
     music: IMusic
 }
 
@@ -32,6 +35,8 @@ const MusicPage = () => {
         isEditorOpend: false,
         musicCover: "",
         music: defaultIMusic,
+        albumPage: 0,
+        albumLastPage: 1,
         musics: [],
         albums: []
     })
@@ -46,15 +51,27 @@ const MusicPage = () => {
     var restAlbum = new RestWraper<IAlbum>("album")
 
     
-    useEffect(() =>
+    useEffect(() => getPages(), [])
+
+    useEffect(() => {
         restAlbum.GetAll({
             onSuccess: (albums) => setState({...state, albums}),
             onError: () => { }
-        }), [])
-
-    useEffect(() => onLoadAlbum(), [selectedAlbum])
+        })
+    }, [state.albumPage])
 
     //#region Functions
+
+    const getPages = () => {
+        restAlbum.GetPages({
+            pageLength: 20,
+            //Setting length inside setState causes state not to update for some reason
+            onSuccess: (length) => { state.albumLastPage = length; setState({...state, albumLastPage: state.albumLastPage}) },
+            onError: () => NotificationManager.Create('Error', 'Error Failed To Get Album Pages', 'danger')
+        })
+    }
+
+    const onPageChange = (newPage: number) => setState({...state, albumPage: newPage - 1})
 
     const createMusic = async (music: string, cover: string) => {
         state.music.album_id = state.albums[selectedAlbum].id
@@ -66,7 +83,7 @@ const MusicPage = () => {
                 music: music,
                 cover: cover
             },
-            token: token,
+            token: token.token,
             onSuccess: () => {
                 NotificationManager.Create("Success", "Success Creating Music", 'success')
                 onLoadAlbum()
@@ -100,7 +117,7 @@ const MusicPage = () => {
         musicFile.current.getMusic(
             (music) => restMusic.UpdateFile({
                 index: state.music.id, 
-                token: token,
+                token: token.token,
                 files: { music: music }, 
                 onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
                 onError: () => NotificationManager.Create("Error", "Error Updating Music File", 'danger') 
@@ -111,7 +128,7 @@ const MusicPage = () => {
         coverFile.current.getImage(
             (cover) => restMusic.UpdateFile({
                 index: state.music.id, 
-                token: token,
+                token: token.token,
                 files: { image: cover }, 
                 onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
                 onError: () => NotificationManager.Create("Error", "Error Updating Music Cover File", 'danger') 
@@ -121,7 +138,7 @@ const MusicPage = () => {
 
         restMusic.Update({
             index: state.music.id,
-            token: token,
+            token: token.token,
             data: state.music,
             onSuccess: () => NotificationManager.Create("Success", "Success Updating Music", 'success'),
             onError: () => NotificationManager.Create("Error", "Error Updating Music", 'danger')
@@ -131,7 +148,7 @@ const MusicPage = () => {
     const onDeleteMusic = () => {
         restMusic.Delete({
             index: state.music.id,
-            token: token,
+            token: token.token,
             onSuccess: () => { 
                 NotificationManager.Create("Success", "Success Deleting Music", 'success')
                 state.musics.splice(selectedMusic, 1)
@@ -148,7 +165,7 @@ const MusicPage = () => {
         if (selectedAlbum == -1)
             return;
         restMusic.GetWhere({
-            token: token,
+            token: token.token,
             arguments: {
                 album_id: state.albums[selectedAlbum].id.toString()
             },
@@ -180,7 +197,7 @@ const MusicPage = () => {
 
     return (
         <>
-            <Library>
+            <Library hasPagination={true} onPageChange={onPageChange} currentPage={state.albumPage + 1} lastPage={state.albumLastPage}>
                 { state.albums.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() => { setState({...state, isEditorOpend: true}), setSelectedAlbum(i) }} image={ restAlbum.GetImage(val.id) } title={val.name}/>) }
             </Library>
             <Popup isOpened={state.isEditorOpend} >

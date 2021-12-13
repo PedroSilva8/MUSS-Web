@@ -18,7 +18,8 @@ export interface IArtistState {
     artist: IArtist
     artistIndex: number
     artists: IArtist[]
-
+    artistPage: number
+    artistLastPage: number
     isEditorOpend: boolean
     editorImage: string
 }
@@ -32,6 +33,8 @@ const ArtistPage = () => {
             name: "" 
         }, 
         artistIndex: -1, 
+        artistPage: 0,
+        artistLastPage: 1,
         artists: [], 
         isEditorOpend: false, 
         editorImage: "" 
@@ -41,14 +44,28 @@ const ArtistPage = () => {
     
     const rest = new RestWraper<IArtist>("artist")
 
-    useEffect(() => getArtists(), [])
+    useEffect(() => getPages(), [])
+
+    useEffect(() => getArtists(), [state.artistPage])
 
 
     //#region Server Requests
 
+    const getPages = () => {
+        rest.GetPages({
+            pageLength: 20,
+            //Setting length inside setState causes state not to update for some reason
+            onSuccess: (length) => { state.artistLastPage = length; setState({...state, artistLastPage: state.artistLastPage}) },
+            onError: () => NotificationManager.Create('Error', 'Error Failed To Get Album Pages', 'danger')
+        })
+    }
+
+    const onPageChange = (newPage: number) => setState({...state, artistPage: newPage - 1})
+
+
     const getArtists = () => {
         rest.GetAll({
-            token: token,
+            token: token.token,
             onSuccess: (artists) => setState({...state, artists }),
             onError: () => NotificationManager.Create("Error", "Error Getting Artists", 'danger')
         })
@@ -59,7 +76,7 @@ const ArtistPage = () => {
             imageFile.current.getImage((image) =>
                 rest.CreateWFiles({
                     data: state.artist,
-                    token: token,
+                    token: token.token,
                     files: { file: image },
                     onSuccess: (artist) => {
                         state.artists.push(artist)
@@ -79,7 +96,7 @@ const ArtistPage = () => {
         rest.Update({
             index: state.artist.id,
             data: state.artist,
-            token: token,
+            token: token.token,
             onSuccess: () => {
                 NotificationManager.Create("Success", "Successfull Update", 'success')
                 state.artists[state.artistIndex] = state.artist
@@ -93,7 +110,7 @@ const ArtistPage = () => {
                 rest.UpdateImage({
                     index: state.artist.id,
                     file: image,
-                    token: token,
+                    token: token.token,
                     onSuccess: () => { },
                     onError: () => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
                 }),
@@ -104,7 +121,7 @@ const ArtistPage = () => {
     const deleteArtist = () => {
         rest.Delete({
             index: state.artist.id,
-            token: token,
+            token: token.token,
             onSuccess: () => {
                 state.artists.splice(state.artistIndex, 1)
                 setState({...state, artists: state.artists, isEditorOpend: false, artistIndex: -1, editorImage: ""})
@@ -139,7 +156,7 @@ const ArtistPage = () => {
 
     return (
         <>
-            <Library>
+            <Library hasPagination={true} onPageChange={onPageChange} currentPage={state.artistPage + 1} lastPage={state.artistLastPage}>
                 <Library.Item onClick={() => { unSelectArtist(); setEditor(true) }} iconSize={100} placeholderIcon="plus" icon="plus" title="New" />
                 { state.artists.map((val, index) => <Library.Item key={index} onClick={() => { selectArtist(index); setEditor(true) }} iconSize={50} icon="play" image={ rest.GetImage(val.id) } title={ val.name }/> ) }
             </Library>

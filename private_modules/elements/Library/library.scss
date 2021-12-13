@@ -1,8 +1,38 @@
 .element-library {
-    padding: 10px 2%;
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    width: 100%;
-    gap: 20px;
+    flex-direction: column;
+    flex: 1;
+
+    >  .element-items {
+        padding: 10px 2%;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 20px;
+        flex: 1;
+    }
+
+    > .element-pagination {
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: flex-end;
+        padding: 10px;
+        
+        > * {
+            border-radius: 5px;
+            width: 45px;
+            height: 35px;
+            margin: 2px;
+        }
+        
+        > span {
+            text-align: center;
+            width: 20px;
+            height: auto;
+            padding-bottom: 5px;
+            color: var(--border);
+        }
+    }
 }

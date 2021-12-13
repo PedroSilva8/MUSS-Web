@@ -12,7 +12,7 @@ const PageHeader = () => {
 
     const Logout = () => {
         Cookies.set('auth', "")
-        setToken("")
+        setToken({ token: "", isLoaded: true })
         navegate("/auth")
     }
 

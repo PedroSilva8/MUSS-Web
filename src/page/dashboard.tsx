@@ -16,12 +16,12 @@ export default () => {
     const { token, user } = useContext(userContext)
     
     useEffect(() => {
-        if (token == "")
+        if (token.isLoaded && token.token == "")
             navegate("/auth")
     }, [token])
 
     useEffect(() => {
-        if (!user.isAdmin)
+        if (token.isLoaded && !user.isAdmin)
             navegate("/")
     }, [user])
 

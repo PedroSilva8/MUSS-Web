@@ -5,7 +5,7 @@ import { IUserContext } from "@interface/context";
 const defaultUserContex : IUserContext = {
     user: defaultUser,
     setUser: () => { },
-    token: "",
+    token: { token: "", isLoaded: false },
     setToken: () => { } 
 }
 

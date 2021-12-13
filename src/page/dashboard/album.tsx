@@ -22,6 +22,8 @@ export interface IAlbumState {
     album: IAlbum
     albumIndex: number
     albums: IAlbum[]
+    albumPage: number
+    albumlastPage: number
 
     isEditorOpend: boolean
     selectingArtist: boolean
@@ -40,6 +42,8 @@ const AlbumPage = () => {
         }, 
         albumIndex: -1,
         albums: [], 
+        albumPage: 0,
+        albumlastPage: 1,
         isEditorOpend: false, 
         selectingArtist: false, 
         editorImage: "" 
@@ -49,15 +53,29 @@ const AlbumPage = () => {
     
     const rest = new RestWraper<IAlbum>("album")
 
-    useEffect(() => getAlbum(), [])
+    useEffect(() => getPages(), [])
+
+    useEffect(() => getAlbums(), [state.albumPage])
 
     //#region Server Requests
 
-    const getAlbum = () => {
+    const getPages = () => {
+        rest.GetPages({
+            pageLength: 20,
+            //Setting length inside setState causes state not to update for some reason
+            onSuccess: (length) => { state.albumlastPage = length; setState({...state, albumlastPage: state.albumlastPage}) },
+            onError: () => NotificationManager.Create('Error', 'Error Failed To Get Album Pages', 'danger')
+        })
+    }
+
+    const onPageChange = (newPage: number) => setState({...state, albumPage: newPage - 1})
+
+    const getAlbums = () => {
         rest.GetAll({
-            token: token,
+            token: token.token,
+            page: state.albumPage,
             onSuccess: (Data) => setState({...state, albums: Data }),
-            onError: () => NotificationManager.Create("Error", "Error Getting Artists", 'danger')
+            onError: () => NotificationManager.Create("Error", "Error Getting Albums", 'danger')
         })
     }
 
@@ -66,10 +84,11 @@ const AlbumPage = () => {
             imageFile.current.getImage((image) =>
                 rest.CreateWFiles({
                     data: state.album,
-                    token: token,
+                    token: token.token,
                     files: { file: image },
                     onSuccess: (Data) => {
-                        state.albums.push(Data)
+                        if (state.albums.length < 20)
+                            state.albums.push(Data)
                         setState({...state, albums: state.albums, editorImage: "", isEditorOpend: false})
                         NotificationManager.Create("Success", "Success Updating Artist", 'success')
                     },
@@ -86,7 +105,7 @@ const AlbumPage = () => {
         rest.Update({
             index: state.album.id,
             data: state.album,
-            token: token,
+            token: token.token,
             onSuccess: (data) => {
                 NotificationManager.Create("Success", "Successfull Update", 'success')
                 state.albums[state.albumIndex] = state.album
@@ -100,7 +119,7 @@ const AlbumPage = () => {
                 rest.UpdateImage({
                     index: state.album.id,
                     file: image,
-                    token: token,
+                    token: token.token,
                     onSuccess: () => { },
                     onError: (data) => NotificationManager.Create("Error", "Error Updating Artist", 'danger')
                 }),
@@ -111,7 +130,7 @@ const AlbumPage = () => {
     const deleteAlbum = () => {
         rest.Delete({
             index: state.album.id,
-            token: token,
+            token: token.token,
             onSuccess: () => {
                 state.albums.splice(state.albumIndex, 1)
                 setState({...state, albums: state.albums, isEditorOpend: false, albumIndex: -1, editorImage: ""})
@@ -140,7 +159,8 @@ const AlbumPage = () => {
         state.album.artist_id = state.albums[index].artist_id
         state.album.name = state.albums[index].name
         state.album.description = state.albums[index].description
-        setState({...state, album: state.album, albumIndex: index})
+        state.albumIndex = index
+        setState({...state, album: state.album, albumIndex: state.albumIndex})
     }
 
     const getEditorImage = () : string =>  state.editorImage == "" ? state.album.id == -1 ? "" : rest.GetImage(state.album.id) : state.editorImage
@@ -149,9 +169,9 @@ const AlbumPage = () => {
 
     return (
         <>
-            <Library>
+            <Library hasPagination={true} onPageChange={onPageChange} currentPage={state.albumPage + 1} lastPage={state.albumlastPage}>
                 <Library.Item onClick={() => { unSelectAlbum(); setEditor(true) }} iconSize={100} placeholderIcon="plus" icon="plus" title="New" />
-                { state.albums.map((val, index) => <Library.Item key={index} onClick={() => { selectAlbum(index); setEditor(true) }} iconSize={50} icon="play" image={ rest.GetImage(val.id) } title={ val.name }/> ) }
+                { state.albums.map((v, i) => <Library.Item key={i} onClick={() => { selectAlbum(i); setEditor(true) }} iconSize={50} icon="play" image={ rest.GetImage(v.id) } title={ v.name }/> ) }
             </Library>
             <Popup isOpened={state.isEditorOpend} >
                 <Popup.Header onClose={() => state.selectingArtist ? setState({...state, selectingArtist: false}) : setEditor(false) } title={state.selectingArtist ? "Select Artist" : state.album.id == -1 ? "Create New" : "Edit" } type="BACK" />

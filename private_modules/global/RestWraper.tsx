@@ -1,6 +1,12 @@
 import Networking from "@global/Networking";
 import RestHelper, { RestResponse } from "@global/RestHelper"
 
+export interface IGetPages {
+    pageLength: number
+    onSuccess: (Size: number) => void
+    onError: (Data: RestResponse) => void    
+}
+
 export interface IGet<T> {
     token?: string
     index?: number
@@ -13,6 +19,7 @@ export interface IGet<T> {
 export interface IGetAll<T> {
     token?: string
     custom?: string
+    page?: number
     onSuccess: (Data: T[]) => void
     onError: (Data: RestResponse) => void
 }
@@ -93,6 +100,15 @@ export default class RestWraper<T> {
         return List;
     }
 
+    GetPages = (props: IGetPages) => {
+        RestHelper.GetPages({
+            target: this.Target,
+            arguments: { PageLength: props.pageLength },
+            onSuccess: (Result) => Result.data.TotalPages && !isNaN(parseInt(Result.data.TotalPages)) ? props.onSuccess(Result.data.TotalPages) : props.onError,
+            onError: props.onError
+        })
+    }
+
     Get = (props:IGet<T>) => {
         if (props.index)
             RestHelper.GetItemData({
@@ -114,7 +130,7 @@ export default class RestWraper<T> {
     GetAll = (props:IGetAll<T>) => {
         RestHelper.GetItems({
             target: this.Target + (props.custom ? props.custom : ""),
-            arguments: { token: props.token },
+            arguments: { token: props.token, page: (props.page ? props.page : 0) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)),
             onError: props.onError
         });
@@ -133,7 +149,7 @@ export default class RestWraper<T> {
         RestHelper.UpdateItems({
             id: props.index,
             target: this.Target,
-            Values: { ...props.data, ...(props.token && { token: props.token } ) },
+            arguments: { ...props.data, ...(props.token && { token: props.token } ) },
             onSuccess: props.onSuccess,
             onError: props.onError
         })
@@ -164,7 +180,7 @@ export default class RestWraper<T> {
     Create = (props:ICreate<T>) => {
         RestHelper.CreateItem({
             target: this.Target,
-            Values: { ...props.data, ...(props.token && { token: props.token } ) },
+            arguments: { ...props.data, ...(props.token && { token: props.token } ) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
             onError: props.onError
         })
@@ -187,7 +203,7 @@ export default class RestWraper<T> {
     CreateWFiles = (props:ICreateWFiles<T>) => {
         RestHelper.CreateItem({
             target: this.Target,
-            Values: { ...props.data, ...props.files, ...(props.token && { token: props.token } ) },
+            arguments: { ...props.data, ...props.files, ...(props.token && { token: props.token } ) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
             onError: props.onError
         })

@@ -26,7 +26,7 @@ export default () => {
     
     /* Check If Logged */
     useEffect(() => {
-        if (token != "")
+        if (token.isLoaded && token.token != "")
             navigate("/")
     }, [])
 
