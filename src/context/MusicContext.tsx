@@ -1,9 +1,9 @@
 import React from "react";
-import { defaultIMusic } from "@interface/database";
+import { defaultMusic } from "@interface/database";
 import { IMusicContext } from "@interface/context";
 
 const defaultMusicContex :IMusicContext = {
-    music: defaultIMusic
+    music: defaultMusic
 }
 
 const musicContext = React.createContext<IMusicContext>(defaultMusicContex)

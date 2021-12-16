@@ -8,49 +8,26 @@ export interface RestResponse {
     other: any
 }
 
-export interface IGetItems {
+export interface IGenericRest {
     target: string,
     arguments?: any
     onSuccess: (Data: RestResponse) => void
     onError: (Data: RestResponse) => void
 }
 
-export interface IGetItemData {
+export interface IGenericRestIndexed {
     target: string
+    targetExtra?: string
     id: IndexKind
     arguments?: any
     onSuccess: (Data: RestResponse) => void
     onError: (Data: RestResponse) => void
 }
 
-export interface ICreateItem {
-    target: string
-    Values: any,
-    onSuccess?: (Data: RestResponse) => void
-    onError?: (Data: RestResponse) => void
-}
-
-export interface IUpdateItem {
-    target: string
-    targetExtra?: string
-    id: IndexKind
-    Values: any
-    onSuccess?: (Data: RestResponse) => void
-    onError?: (Data: RestResponse) => void
-}
-
 export interface IUpdateFile {
     target: string
     id: IndexKind
     fileData: { [key: string]: string; }
-    arguments?: any
-    onSuccess?: (Data: RestResponse) => void
-    onError?: (Data: RestResponse) => void
-}
-
-export interface IDeleteItem {
-    target: string
-    id: IndexKind
     arguments?: any
     onSuccess?: (Data: RestResponse) => void
     onError?: (Data: RestResponse) => void
@@ -68,7 +45,7 @@ export default class RestHelper {
 
         Object.keys(Data).forEach(element => {
             if (element != "status" && element != "data")
-                extra[element] = Data[element];
+                extra[element] = Data[element]
         });
 
         return { isValid: true, status: parseInt(Data["status"]), data: Data["data"], other: extra }
@@ -81,19 +58,33 @@ export default class RestHelper {
         return { isValid: true, status: parseInt(Data.responseJSON["status"]), data: Data.responseJSON["data"], other: {} }
     }
 
-    static GetItems = (props: IGetItems) => {
+    static GetPages = (props: IGenericRest) => {
+        Networking.sendRequest({
+            url: `${RestHelper.baseURL}${props.target}/pages`,
+            type: 'GET',
+            data: props.arguments,
+            onSuccess: (Data) => {
+                var Response = RestHelper.DataToResponse(Data);
+                if (!Response.isValid || Response.status != 0)
+                    props.onError(Response)
+                else if (props.onSuccess)
+                    props.onSuccess(Response)
+            },
+            onError: (Data) => props.onError(RestHelper.ErrorToResponse(Data))
+        })
+    }
+
+    static GetItems = (props: IGenericRest) => {
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}`,
             type: 'GET',
             data: props.arguments,
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
-                if (!Response.isValid || Response.status != 0) {
-                    if (props.onError)
-                        props.onError(Response);
-                }
+                if (!Response.isValid || Response.status != 0)
+                    props.onError(Response)
                 else if (props.onSuccess)
-                    props.onSuccess(Response);
+                    props.onSuccess(Response)
             },
             onError: (Data) => {
                 if (props.onError)
@@ -102,45 +93,35 @@ export default class RestHelper {
         });
     }
 
-    static CreateItem = (props: ICreateItem) => {
+    static CreateItem = (props: IGenericRest) => {
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}/`,
             type: 'POST',
-            data: props.Values,
+            data: props.arguments,
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
-                if (!Response.isValid || Response.status != 0) {
-                    if (props.onError)
-                        props.onError(Response);
-                }
-                else if (props.onSuccess)
-                    props.onSuccess(Response);
+                if (!Response.isValid || Response.status != 0)
+                    props.onError(Response)
+                else
+                    props.onSuccess(Response)
             },
-            onError: (Data) => {
-                if (props.onError)
-                    props.onError(RestHelper.ErrorToResponse(Data));
-            }
+            onError: (Data) => props.onError(RestHelper.ErrorToResponse(Data))
         });
     }
 
-    static GetItemData = (props: IGetItemData) => {
+    static GetItemData = (props: IGenericRestIndexed) => {
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}/${props.id}`,
             type: 'GET',
             data: props.arguments,
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
-                if (!Response.isValid || Response.status != 0) {
-                    if (props.onError)
-                        props.onError(Response);
-                }
-                else if (props.onSuccess)
-                    props.onSuccess(Response);
+                if (!Response.isValid || Response.status != 0)
+                    props.onError(Response)
+                else
+                    props.onSuccess(Response)
             },
-            onError: (Data) => {
-                if (props.onError)
-                    props.onError(RestHelper.ErrorToResponse(Data));
-            }
+            onError: (Data) => props.onError(RestHelper.ErrorToResponse(Data))
         });
     }
 
@@ -148,27 +129,22 @@ export default class RestHelper {
         return `${RestHelper.baseURL}${target}/${id}/Image`
     }
 
-    static UpdateItems = (props: IUpdateItem) => {
+    static UpdateItems = (props: IGenericRestIndexed) => {
 
         var targetExtra = (props.targetExtra ? props.targetExtra : "")
 
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}/${props.id}${targetExtra}`,
             type: 'PUT',
-            data: props.Values,
+            data: props.arguments,
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
-                if (!Response.isValid || Response.status != 0) {
-                    if (props.onError)
-                        props.onError(Response);
-                }
-                else if (props.onSuccess)
-                    props.onSuccess(Response);
+                if (!Response.isValid || Response.status != 0)
+                    props.onError(Response)
+                else
+                    props.onSuccess(Response)
             },
-            onError: (Data) => {
-                if (props.onError)
-                    props.onError(RestHelper.ErrorToResponse(Data));
-            }
+            onError: (Data) => props.onError(RestHelper.ErrorToResponse(Data))
         });
     }
 
@@ -180,40 +156,30 @@ export default class RestHelper {
                 data: props.arguments,
                 file: props.fileData[key],
                 onSuccess: (Data) => {
-                    var Response = RestHelper.DataToResponse(Data);
-                    if (!Response.isValid || Response.status != 0) {
-                        if (props.onError)
-                            props.onError(Response);
-                    }
-                    else if (props.onSuccess)
-                        props.onSuccess(Response);
+                    var Response = RestHelper.DataToResponse(Data)
+                    if (!Response.isValid || Response.status != 0)
+                            props.onError(Response)
+                    else
+                        props.onSuccess(Response)
                 },
-                onError: (Data) => {
-                    if (props.onError)
-                        props.onError(RestHelper.ErrorToResponse(Data));
-                }
+                onError: (Data) => props.onError(RestHelper.ErrorToResponse(Data))
             });
         }
     }
 
-    static DeleteItem = (props:IDeleteItem) => {
+    static DeleteItem = (props:IGenericRestIndexed) => {
         Networking.sendRequest({
             url: `${RestHelper.baseURL}${props.target}/${props.id}`,
             data: props.arguments,
             type: 'DELETE',
             onSuccess: (Data) => {
                 var Response = RestHelper.DataToResponse(Data);
-                if (!Response.isValid || Response.status != 0) {
-                    if (props.onError)
-                        props.onError(Response);
-                }
-                else if (props.onSuccess)
-                    props.onSuccess(Response);
+                if (!Response.isValid || Response.status != 0) 
+                    props.onError(Response)
+                else
+                    props.onSuccess(Response)
             },
-            onError: (Data) => {
-                if (props.onError)
-                    props.onError(RestHelper.ErrorToResponse(Data));
-            }
+            onError: (Data) => props.onError(RestHelper.ErrorToResponse(Data))
         });
     }
 }

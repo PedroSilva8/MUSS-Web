@@ -1,132 +1,77 @@
-import React, { useContext, useEffect } from "react"
+import React, { createRef, useContext } from "react"
 
 import { defaultUser, IUser } from "@interface/database"
 
-import RestWraper from "@global/RestWraper"
 import NotificationManager from "@global/NotificationManager"
 
-import Library from "@elements/Library"
-import Popup from "@elements/Popup"
 import Input from "@elements/Input"
 import Switch from "@elements/Switch"
 
 import userContext from "@context/AuthContext"
 
+import GenericEditor from './genericEditor'
+
+import './scss/user.scss'
+
 interface IUsersPageState {
-    users: IUser[]
-    user: IUser
+    user: IUser | null
     newPassword: string
     conPassword: string
-    selectedUser: number
-    isEditorOpend: boolean
+    isEditing: boolean
 }
 
 const UsersPage = () => {
+    const restName = "user"
     const { token } = useContext(userContext)
+
+    const editor = createRef<GenericEditor<IUser>>()
     
     const [ state, setState ] = React.useState<IUsersPageState>({
-        users: [],
-        user: defaultUser,
-        newPassword: '',
-        conPassword: '',
-        selectedUser: -1,
-        isEditorOpend: false
+        user: null,
+        newPassword: "",
+        conPassword: "",
+        isEditing: false
     })
 
-    var restUser = new RestWraper<IUser>('user')
-
-    useEffect(() => restUser.GetAll({
-        token: token,
-        onSuccess: (users) => setState({...state, users}),
-        onError: () => NotificationManager.Create('Error', "Failed Getting Users", 'danger')
-    }), [])
-
-    const IsPasswordValid = () : boolean => {
-        if (state.conPassword != state.newPassword)
-            return false
-        return true
+    const onEditorChange = (newValue: boolean) => {
+        state.isEditing = newValue
+        setState({...state, isEditing: state.isEditing})
+        return newValue
     }
 
-    const onCreateUser = () => {
-        if (!IsPasswordValid()) {
-            NotificationManager.Create('Error', "Failed Updating Users", 'danger')
-            return
-        }
-        state.user.password = state.conPassword
+    const onSelectItem = (i: IUser | null) => {
+        state.user = i ? i : defaultUser
         setState({...state, user: state.user})
-
-        restUser.Create({
-            token: token,
-            data: state.user,
-            onSuccess: (data) => { NotificationManager.Create('Success', 'Successfully Created User', 'success'); state.users.push(data); setState({...state, users: state.users}); popupGoBack() },
-            onError: () => NotificationManager.Create('Error', "Failed Creating User", 'danger')
-        })
     }
 
-    const onSaveUser = () => {
-        restUser.Update({
-            index: state.user.id,
-            token: token,
-            data: state.user,
-            onSuccess: () => { NotificationManager.Create('Success', 'Successfully Updated User', 'success'); state.users[state.selectedUser] = state.user; setState({...state, users: state.users}) },
-            onError: (err) => NotificationManager.Create('Error', "Failed Updating User - " + err.data, 'danger')
-        })
+    const onCreate = () => {
+        if (state.conPassword == "" || state.newPassword == "")
+            return NotificationManager.Create('Error', 'Password Missing', 'danger')
+        else if (state.conPassword != state.newPassword)
+            return NotificationManager.Create('Error', 'Password Doesn\'t Match', 'danger')
+        
+        state.user.password = state.newPassword
+        setState({...state})
+        editor.current.onCreateItem()
     }
 
-    const onDeleteUser = () => {
-        restUser.Delete({
-            index: state.user.id,
-            token: token,
-            onSuccess: () => { NotificationManager.Create('Success', 'Successfully Updated User', 'success'); state.users.splice(state.selectedUser, 1); setState({...state, users: state.users, isEditorOpend: false, selectedUser: -1}); popupGoBack() },
-            onError: (err) => NotificationManager.Create('Error', "Failed Deliting User - " + err.data, 'danger')
-        })
-    }
-
-    const selectUser = (index: number) => {
-        state.user.id = state.users[index].id
-        state.user.name = state.users[index].name
-        state.user.password = state.users[index].password
-        state.user.isAdmin = state.users[index].isAdmin
-
-        setState({...state, selectedUser: index, user: state.user, isEditorOpend: true})
-    }
-
-    const getPopupTitle = () => {
-        if (state.user.id != -1)
-            return "Edit " + state.user.name
-        return "Create New User"
-    }
-
-    const popupGoBack = () => {
-        state.user = defaultUser
-        setState({...state, isEditorOpend: false, user: state.user})
+    const onUpdate = () => {
+        if ((state.conPassword != "" || state.newPassword != "") && state.conPassword != state.newPassword)
+            return NotificationManager.Create('Error', 'Password Doesn\'t Match', 'danger')
+        
+        state.user.password = state.newPassword
+        setState({...state})
+        editor.current.onUpdateItem()
     }
 
     return (
         <>
-            <Library>
-                <Library.Item iconSize={100} onClick={() => setState({...state, selectedUser: -1, isEditorOpend: true})} placeholderIcon="plus" icon="plus" title="New"/>
-                { state.users.map((val, i) => <Library.Item placeholderIcon="account" onClick={() => selectUser(i)} key={i} iconSize={50} icon="pencil" title={val.name}/>) }
-            </Library>
-            <Popup isOpened={state.isEditorOpend} >
-                <Popup.Header onClose={popupGoBack} title={getPopupTitle()} type="BACK" />
-                <Popup.Content id="MusicDashboard">
-                    <Input label="Name" value={state.user.name} onChange={(v) => { state.user.name = v; setState({...state, user: state.user}) }}/>
-                    <Input type="password" label="New Password" value={state.newPassword} onChange={(v) => setState({...state, newPassword: v})}/>
-                    <Input type="password" label="Confirm New Password" value={state.conPassword} onChange={(v) => setState({...state, conPassword: v})}/>
-                    <Switch label="Is Admin" onCheck={(checked) => { state.user.isAdmin = checked; setState({...state, user: state.user}) }} checked={ state.user.isAdmin }/>
-                </Popup.Content>
-                <Popup.Footer>
-                    { state.selectedUser == -1 ? 
-                        <Popup.Footer.Button onClick={onCreateUser} text="Create"/>:
-                        state.selectedUser >= 0 ?
-                        <>
-                            <Popup.Footer.Button onClick={onSaveUser} text="Save"/>
-                            <Popup.Footer.Button onClick={onDeleteUser} text="Delete"/>
-                        </>:<></>
-                    }
-                </Popup.Footer>
-            </Popup>
+            <GenericEditor<IUser> id="UserDashboard" ref={editor} useImages={false} onCreate={onCreate} onUpdate={onUpdate} placeholder="account" restName={restName} token={token.token} getFiles={(p) => p.onSucess({})} onSelectItem={onSelectItem} selectedItem={state.user} isEditing={state.isEditing} onEditorChange={onEditorChange}>
+                <Input label="Name" value={state.user?.name} onChange={(v) => { state.user.name = v; setState({...state, user: state.user}) }}/>
+                <Input type="password" label="New Password" value={state.newPassword} onChange={(v) => setState({...state, newPassword: v})}/>
+                <Input type="password" label="Confirm New Password" value={state.conPassword} onChange={(v) => setState({...state, conPassword: v})}/>
+                <Switch label="Is Admin" onCheck={(checked) => { state.user.isAdmin = checked; setState({...state, user: state.user}) }} checked={ state.user?.isAdmin }/>
+            </GenericEditor>
         </>
     );
 }

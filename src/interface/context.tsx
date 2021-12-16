@@ -5,9 +5,14 @@ export interface IMusicContext {
     setMusic?: (music: IMusic) => void
 }
 
+export interface Token {
+    token: string,
+    isLoaded: boolean
+}
+
 export interface IUserContext {
     user: IUser
-    token: string
+    token: Token
     setUser?: (user: IUser) => void
-    setToken?: (token: string) => void
+    setToken?: (token: Token) => void
 }

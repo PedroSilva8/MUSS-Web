@@ -17,6 +17,7 @@ import RestHelper from '@global/RestHelper';
 
 import './scss/index.scss'
 import 'react-notifications-component/dist/scss/notification.scss'
+import { Token } from '@interface/context';
 
 Themehandler.Themes.push({
   name: "dark",
@@ -30,17 +31,19 @@ Themehandler.Themes.push({
 
 Themehandler.SetTheme("dark");
 
+
+
 const App = () => {
   const [ user, setUser ] = useState<IUser>(defaultUser)
-  const [ token, setToken ] = useState<string>("")
+  const [ token, setToken ] = useState<Token>({ token: "", isLoaded: false })
 
   useEffect(() => {
     var auth = Cookies.get('auth')
-    setToken(auth ? auth : "")
+    setToken({token: auth ? auth : "", isLoaded: true})
   }, [])
 
   useEffect(() => {
-    if (token && token != "")
+    if (token.token && token.token != "")
       RestHelper.GetItems({
         target: "user/token",
         arguments: { token: token },

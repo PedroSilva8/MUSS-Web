@@ -1,0 +1,12 @@
+#dashboard-library {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: flex-start;
+
+    > #search {
+        margin-left: 20px;
+        width: 20%;
+        min-width: 180px;
+    }
+}

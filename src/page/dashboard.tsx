@@ -11,17 +11,19 @@ import MusicPage from "./dashboard/music"
 import UsersPage from "./dashboard/users";
 import PageHeader from "./pageHeader";
 
+import './scss/dashboard.scss'
+
 export default () => {
     const navegate = useNavigate();
     const { token, user } = useContext(userContext)
     
     useEffect(() => {
-        if (token == "")
+        if (token.isLoaded && token.token == "")
             navegate("/auth")
     }, [token])
 
     useEffect(() => {
-        if (!user.isAdmin)
+        if (token.isLoaded && !user.isAdmin)
             navegate("/")
     }, [user])
 
