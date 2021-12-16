@@ -23,4 +23,4 @@ yarn
 yarn build
 ```
 # Testers Wanted
-Due to a lack of personnel and time, we can't test in detail every change we make if you have the time to test our software for bugs feel to open an issue we would appreciate any help
+Due to a lack of personnel and time, we can't test in detail every change we make if you have the time to test our software for bugs feel free to open an issue we would appreciate any help
