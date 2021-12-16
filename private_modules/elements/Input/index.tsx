@@ -3,6 +3,7 @@ import React from "react";
 import './input.scss'
 
 export interface IInputProps {
+    id: string
     label: string
     value: string
     placeholder: string
@@ -14,7 +15,7 @@ export interface IInputProps {
 const Input = (props: IInputProps) => {
 
     return (
-        <div className={ "element-input " + (props.direction == 'row' ? "row" : "column")}>
+        <div id={props.id} className={ "element-input " + (props.direction == 'row' ? "row" : "column")}>
             { props.label != "" ? <span>{ props.label }</span> : <></> }
             <input type={props.type} value={props.value} onChange={(e) => { props.onChange(e.target.value) }} placeholder={props.placeholder}/>
         </div>
@@ -22,6 +23,7 @@ const Input = (props: IInputProps) => {
 }
 
 Input.defaultProps = {
+    id: "",
     label: "",
     value: "",
     placeholder: "",

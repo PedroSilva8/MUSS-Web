@@ -1,232 +1,121 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useState } from "react";
 
-import Library from '@elements/Library'
-import Popup from '@elements/Popup'
 import ImageSelector from '@elements/ImageSelector'
 import Input from "@elements/Input"
-import MusicPlayer from "@elements/MusicPlayer"
 import TextArea from "@elements/TextArea"
+import MusicPlayer from "@elements/MusicPlayer"
 
-import { defaultIMusic, IAlbum, IMusic } from "@interface/database"
+import { defaultAlbum, defaultMusic, IAlbum, IMusic } from "@interface/database"
 
 import RestWraper from "@global/RestWraper"
 
-import './scss/music.scss'
-import NotificationManager from "@global/NotificationManager";
 import userContext from "@context/AuthContext";
 
+import GenericEditor, { IGetFiles } from "./genericEditor";
+
+import './scss/music.scss'
+import NotificationManager from "@modules/global/NotificationManager";
 
 export interface IMusicState {
-    isEditorOpend: boolean
-    musicCover: string
-    
-    musics: IMusic[]
-    albums: IAlbum[]
+    album: IAlbum | null
+    music: IMusic | null
+    cover: string
 
-    albumPage: number
-    albumLastPage: number
-
-    music: IMusic
+    isEditingAlbum: boolean
+    isEditingMusic: boolean
 }
 
 const MusicPage = () => {
+    const RestNameMusic = "music"
+    const RestNameAlbum = "album"
+    
+    const rest = new RestWraper<IMusic>(RestNameMusic)
+    
+    const musicEditor = React.createRef<GenericEditor<IMusic>>()
+    const coverFile = React.createRef<ImageSelector>()
+    const musicFile = React.createRef<MusicPlayer>() 
+
     const { token } = useContext(userContext)
     const [state, setState] = useState<IMusicState>({ 
-        isEditorOpend: false,
-        musicCover: "",
-        music: defaultIMusic,
-        albumPage: 0,
-        albumLastPage: 1,
-        musics: [],
-        albums: []
+        album: null,
+        music: null,
+        cover: "",
+        isEditingAlbum: false,
+        isEditingMusic: false
     })
-
-    const  [ selectedAlbum, setSelectedAlbum ] = useState<number>(-1)
-    const  [ selectedMusic, setSelectedMusic ] = useState<number>(-2)
-
-    var coverFile = React.createRef<ImageSelector>()
-    var musicFile = React.createRef<MusicPlayer>() 
-
-    var restMusic = new RestWraper<IMusic>("music")
-    var restAlbum = new RestWraper<IAlbum>("album")
-
     
-    useEffect(() => getPages(), [])
+    const onSelectAlbum = (item: IAlbum) => setState({...state, album: item ? item: defaultAlbum})
 
-    useEffect(() => {
-        restAlbum.GetAll({
-            onSuccess: (albums) => setState({...state, albums}),
-            onError: () => { }
-        })
-    }, [state.albumPage])
-
-    //#region Functions
-
-    const getPages = () => {
-        restAlbum.GetPages({
-            pageLength: 20,
-            //Setting length inside setState causes state not to update for some reason
-            onSuccess: (length) => { state.albumLastPage = length; setState({...state, albumLastPage: state.albumLastPage}) },
-            onError: () => NotificationManager.Create('Error', 'Error Failed To Get Album Pages', 'danger')
-        })
+    const onSelectMusic = (item: IMusic) => {
+        item = item ? item: defaultMusic
+        item.album_id = state.album.id
+        setState({...state, music: item})
     }
 
-    const onPageChange = (newPage: number) => setState({...state, albumPage: newPage - 1})
+    const onAlbumChange = (newValue: boolean) => {
 
-    const createMusic = async (music: string, cover: string) => {
-        state.music.album_id = state.albums[selectedAlbum].id
-        setState({...state, music: state.music})
-
-        restMusic.CreateWFiles({
-            data: state.music,
-            files: {
-                music: music,
-                cover: cover
-            },
-            token: token.token,
-            onSuccess: () => {
-                NotificationManager.Create("Success", "Success Creating Music", 'success')
-                onLoadAlbum()
-                musicFile.current?.audio.pause()
-                popupGoBack()
-            },
-            onError: () => NotificationManager.Create("Error", "Error Creating Music", 'danger')
-        })
-    }
-
-    const onCreateMusic = () => {
-        if (!musicFile.current.hasMusic()) {
-            NotificationManager.Create("Error", "Error Creating Music - Missing Audio File", 'danger')
-            return;
+        if (state.music) {
+            state.music = null
+            state.isEditingMusic = false
+            state.isEditingAlbum = true
         }
-        
-        musicFile.current.getMusic(
-            (music) => {
-                if (coverFile.current.hasImage())
-                    coverFile.current.getImage(
-                        (img) => createMusic(music, img),
-                        (err) => {}
-                    )
-                createMusic(music, "")
-            },
-            () => NotificationManager.Create("Error", "Error Creating Music - Faild To Load Audio File", 'danger')
-        )
-    }
-
-    const onUpdateMusic = () => {
-        musicFile.current.getMusic(
-            (music) => restMusic.UpdateFile({
-                index: state.music.id, 
-                token: token.token,
-                files: { music: music }, 
-                onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
-                onError: () => NotificationManager.Create("Error", "Error Updating Music File", 'danger') 
-            }),
-            () => {}
-        )
-
-        coverFile.current.getImage(
-            (cover) => restMusic.UpdateFile({
-                index: state.music.id, 
-                token: token.token,
-                files: { image: cover }, 
-                onSuccess: () =>NotificationManager.Create("Success", "Success Updating Music", 'success'),
-                onError: () => NotificationManager.Create("Error", "Error Updating Music Cover File", 'danger') 
-            }),
-            () => {}
-        )
-
-        restMusic.Update({
-            index: state.music.id,
-            token: token.token,
-            data: state.music,
-            onSuccess: () => NotificationManager.Create("Success", "Success Updating Music", 'success'),
-            onError: () => NotificationManager.Create("Error", "Error Updating Music", 'danger')
-        })
-    }
-
-    const onDeleteMusic = () => {
-        restMusic.Delete({
-            index: state.music.id,
-            token: token.token,
-            onSuccess: () => { 
-                NotificationManager.Create("Success", "Success Deleting Music", 'success')
-                state.musics.splice(selectedMusic, 1)
-                musicFile.current?.audio.pause()
-                setState({...state, music: defaultIMusic})
-                setSelectedMusic(-1)
-                popupGoBack()
-            },
-            onError: () => NotificationManager.Create("Error", "Error Deleting Music", 'danger')
-        })
-    }
-
-    const onLoadAlbum = () => {
-        if (selectedAlbum == -1)
-            return;
-        restMusic.GetWhere({
-            token: token.token,
-            arguments: {
-                album_id: state.albums[selectedAlbum].id.toString()
-            },
-            onSuccess: (musics) => setState({...state, musics}),
-            onError: () => NotificationManager.Create("Error", "Error Loading Albums", 'danger')
-        })
-    }
-
-    const popupGoBack = () => {
-        if (selectedMusic == -2)
-            setState({...state, isEditorOpend: false})
-        else {
-            setState({...state, music: defaultIMusic, musicCover: ""})
-            setSelectedMusic(-2)
-        }
-        musicFile.current?.audio.pause()
-    }
-
-    const getPopupTitle = () => {
-        if (selectedMusic == -2 && selectedAlbum != -1)
-            return "Edit " + state.albums[selectedAlbum].name
-        if (selectedMusic == -1)
-            return "Add Music"
         else
-            return "Edit " + state.music.name
+            state.isEditingAlbum = newValue
+
+        setState({...state})
+    }
+    const onMusicChange = (newValue: boolean) => {
+        state.isEditingMusic = newValue
+        setState({...state})
     }
 
-    //#endregion
+    const PopupTitle = () => {
+        if (state.music?.id == -1)
+            return "Creating Music - " + state.music.name
+        if (state.music)
+            return "Editing Music - " + state.music.name 
+        return "Select Music"
+    }
 
+    const getFiles = (props: IGetFiles) => {
+
+        if (musicFile.current.hasMusic())
+            musicFile.current.getMusic(
+                (music) => {
+                    if (coverFile.current.hasImage())
+                        coverFile.current.getImage(
+                            (img) => props.onSucess({music: music, cover: img}),
+                            () => NotificationManager.Create("Error", "Error Creating Music - Faild To Load Cover File", 'danger')
+                        )
+                    props.onSucess({music: music})
+                },
+                () => NotificationManager.Create("Error", "Error Creating Music - Faild To Load Audio File", 'danger')
+            )
+        else if (coverFile.current.hasImage())
+            coverFile.current.getImage(
+                (img) => props.onSucess({cover: img}),
+                () => NotificationManager.Create("Error", "Error Creating Music - Faild To Load Cover File", 'danger')
+            )
+        else
+                props.onSucess({})
+    }
+
+    const onCreate = () => musicEditor.current.onCreateItem()
+
+    const onUpdate = () => musicEditor.current.onUpdateItem()
+    
+    const onDelete = () => musicEditor.current.onDeleteItem()
+ 
     return (
         <>
-            <Library hasPagination={true} onPageChange={onPageChange} currentPage={state.albumPage + 1} lastPage={state.albumLastPage}>
-                { state.albums.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() => { setState({...state, isEditorOpend: true}), setSelectedAlbum(i) }} image={ restAlbum.GetImage(val.id) } title={val.name}/>) }
-            </Library>
-            <Popup isOpened={state.isEditorOpend} >
-                <Popup.Header onClose={popupGoBack} title={getPopupTitle()} type="BACK" />
-                <Popup.Content id="MusicDashboard">
-                    { selectedMusic == -2 ?
-                        <Library>
-                            <Library.Item onClick={() => { setState({...state, music: state.music}); setSelectedMusic(-1) } } iconSize={100} placeholderIcon="plus" icon="plus" title="New"/>
-                            { state.musics.map((val, i) => <Library.Item key={i} iconSize={50} icon="pencil" onClick={() =>  { setState({...state, music: state.musics[i]}); setSelectedMusic(i);   }} image={restMusic.GetImage(val.id)} title={val.name}/>) }
-                        </Library>:
-                        <>
-                            <ImageSelector ref={ coverFile } onChange={(img) => setState({...state, musicCover: img})} image={state.musicCover != "" || state.music.id == -1 ? state.musicCover : restMusic.GetImage(state.music.id)} text="Cover"/>
-                            <Input onChange={(v) => { state.music.name = v; setState({...state, music: state.music}) }} value={ state.music.name } label="Name"/>
-                            <TextArea onChange={(v) => { state.music.description = v; setState({...state, music: state.music}) }} value={ state.music.description } label="Description"/>
-                            <MusicPlayer canUpload={true} src={restMusic.GetFile(state.music.id, "music")} ref={ musicFile }/>
-                        </>
-                    }
-                </Popup.Content>
-                <Popup.Footer>
-                    { selectedMusic == -1 ? 
-                        <Popup.Footer.Button onClick={onCreateMusic} text="Create"/>:
-                        selectedMusic >= 0 ?
-                        <>
-                            <Popup.Footer.Button onClick={onUpdateMusic} text="Save"/>
-                            <Popup.Footer.Button onClick={onDeleteMusic} text="Delete"/>
-                        </>:<></>
-                    }
-                </Popup.Footer>
-            </Popup>
+            <GenericEditor<IAlbum> onCreate={onCreate} onUpdate={onUpdate} onDelete={onDelete} isCreating={state.music ? state.music.id == -1 ? 'true' : 'false' : 'hide'} isEditing={state.isEditingAlbum} getTitle={PopupTitle} onEditorChange={onAlbumChange} canCreate={false} onSelectItem={onSelectAlbum} selectedItem={state.album} restName={RestNameAlbum} token={token.token}>
+                <GenericEditor<IMusic> ref={musicEditor} getFiles={getFiles} isEditing={state.isEditingMusic} onEditorChange={onMusicChange} onSelectItem={onSelectMusic} id="MusicDashboard" hasPagination={false} usePopup={false} selectedItem={state.music} restName={RestNameMusic} token={token.token}>
+                    <ImageSelector ref={ coverFile } onChange={(img) => setState({...state, cover: img})} image={state.cover != "" || state.music?.id == -1 ? state.cover : rest.GetImage(state.music?.id)} text="Cover"/>
+                    <Input onChange={(v) => { state.music.name = v; setState({...state, music: state.music}) }} value={ state.music?.name } label="Name"/>
+                    <TextArea onChange={(v) => { state.music.description = v; setState({...state, music: state.music}) }} value={ state.music?.description } label="Description"/>
+                    <MusicPlayer canUpload={true} src={rest.GetFile(state.music?.id, "music")} ref={ musicFile }/>
+                </GenericEditor>
+            </GenericEditor>
         </>
     );
 }

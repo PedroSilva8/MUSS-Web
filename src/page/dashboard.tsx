@@ -11,6 +11,8 @@ import MusicPage from "./dashboard/music"
 import UsersPage from "./dashboard/users";
 import PageHeader from "./pageHeader";
 
+import './scss/dashboard.scss'
+
 export default () => {
     const navegate = useNavigate();
     const { token, user } = useContext(userContext)
