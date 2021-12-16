@@ -63,10 +63,12 @@ const MusicPage = () => {
             state.isEditingAlbum = newValue
 
         setState({...state})
+        return state.isEditingAlbum
     }
     const onMusicChange = (newValue: boolean) => {
         state.isEditingMusic = newValue
         setState({...state})
+        return newValue;
     }
 
     const PopupTitle = () => {

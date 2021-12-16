@@ -25,7 +25,8 @@ export interface IGenericEditorState<T> {
 export interface IGenericEditorProps<T> {
     /* CSS */
     id: string
-
+    placeholder?: string
+    useImages: boolean
     /* Rest */
     restName: string
     token: string
@@ -51,7 +52,7 @@ export interface IGenericEditorProps<T> {
 
     /* Editor */
     isEditing: boolean
-    onEditorChange: (newValue: boolean) => void
+    onEditorChange: (newValue: boolean) => boolean
 }
 
 
@@ -61,6 +62,7 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
 
     public static defaultProps = {
         id: "",
+        useImages: true,
         canCreate: true,
         hasPagination: true,
         usePopup: true,
@@ -100,8 +102,9 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
         this.rest.Get({
                 index: this.state.items[index].id,
                 onSuccess: (Data) => {  
+                    var ori = Object.assign({}, this.state.items[index])
                     this.state.items[index] = Data
-                    this.setState({ ...this.state, items: this.state.items})
+                    this.setState({ ...this.state, items: this.state.items, selectedIndex: index, originalItem: ori})
                     this.props.onEditorChange(true)
                     this.props.onSelectItem(this.state.items[index])
                 },
@@ -194,9 +197,16 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
         return (
             <Library hasPagination={this.props.hasPagination} onPageChange={this.onPageChange} currentPage={this.state.currentPage + 1} lastPage={this.state.lastPage}>
                 { this.props.canCreate ? <Library.Item onClick={() => this.onSelectItem(-1)} iconSize={100} placeholderIcon="plus" icon="plus" title="New" /> : <></> }
-                { this.state.items.map((val, index) => <Library.Item key={index} onClick={() => { this.onSelectItem(index); this.props.onEditorChange(true) }} iconSize={50} icon="play" image={ this.rest.GetImage(val.id) } title={ val.name }/> ) }
+                { this.state.items.map((val, index) => <Library.Item key={index} onClick={() => { this.onSelectItem(index); this.props.onEditorChange(true) }} iconSize={50} placeholderIcon={this.props.placeholder} icon="pencil" image={ this.props.useImages ? this.rest.GetImage(val.id) : undefined } title={ val.name }/> ) }
             </Library>
         )
+    }
+
+    onClosePopup = () => {
+        if (!this.props.onEditorChange(false)) { 
+            this.state.items[this.state.selectedIndex] = this.state.originalItem; 
+            this.setState({items: this.state.items}) 
+        }
     }
 
     render = () => {
@@ -206,7 +216,7 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
                     <>
                         <this.RenderLibrary/>
                         <Popup isOpened={this.props.isEditing} >
-                            <Popup.Header onClose={() => { this.props.onEditorChange(false) }} title={this.getEditorTitle()} type="BACK" />
+                            <Popup.Header onClose={this.onClosePopup} title={this.getEditorTitle()} type="BACK" />
                             <Popup.Content id={this.props.id}>
                                 { this.props.children }
                             </Popup.Content>

@@ -54,6 +54,7 @@ const AlbumPage = () => {
         else
             state.isEditing = v
         setState({...state})
+        return state.isEditing
     }
 
     return (

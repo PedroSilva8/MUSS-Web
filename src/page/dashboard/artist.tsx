@@ -44,6 +44,7 @@ const ArtistPage = () => {
     const onEditorChange = (v: boolean) => {
         state.isEditing = v
         setState({...state, isEditing: state.isEditing})
+        return v
     }
 
     return (
