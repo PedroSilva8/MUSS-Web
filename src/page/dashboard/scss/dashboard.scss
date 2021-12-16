@@ -1,0 +1,11 @@
+.Dashboard {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+
+    > .element-input {
+        margin-left: 30px;
+        width: 10%;
+        min-width: 250px;
+    }
+}

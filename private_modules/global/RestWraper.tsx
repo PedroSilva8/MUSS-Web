@@ -20,6 +20,7 @@ export interface IGetAll<T> {
     token?: string
     custom?: string
     page?: number
+    arguments?: { [key: string]: string; }
     onSuccess: (Data: T[]) => void
     onError: (Data: RestResponse) => void
 }
@@ -130,7 +131,7 @@ export default class RestWraper<T> {
     GetAll = (props:IGetAll<T>) => {
         RestHelper.GetItems({
             target: this.Target + (props.custom ? props.custom : ""),
-            arguments: { token: props.token, page: (props.page ? props.page : 0) },
+            arguments: { ...{ token: props.token, page: (props.page ? props.page : 0) }, ...props.arguments },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)),
             onError: props.onError
         });

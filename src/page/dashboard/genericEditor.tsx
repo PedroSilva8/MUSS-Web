@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react"
 
 import Library from '@elements/Library'
 import Popup from '@elements/Popup'
+import Input from "@elements/Input"
 
 import RestWraper from "@global/RestWraper"
 import NotificationManager from '@global/NotificationManager'
+
+import './scss/dashboard.scss'
 
 export interface IGetFiles {
     onSucess: (files: { [key: string]: string }) => void
@@ -16,6 +19,7 @@ export interface IGenericEditorState<T> {
     items: T[]
     originalItem: T | null
     selectedIndex: number
+    search: string
     
     /* Pagination */
     currentPage: number
@@ -27,6 +31,7 @@ export interface IGenericEditorProps<T> {
     id: string
     placeholder?: string
     useImages: boolean
+
     /* Rest */
     restName: string
     token: string
@@ -78,7 +83,8 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
             originalItem: null,
             selectedIndex: -1,
             currentPage: 0,
-            lastPage: 1
+            lastPage: 1,
+            search: ""
         }
     }
 
@@ -92,6 +98,7 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
     getItems = () => {
         this.rest.GetAll({
             page: this.state.currentPage,
+            arguments: { ...( this.state.search != "" && { search: this.state.search } ) },
             onSuccess: (data) => this.setState({items: data}),
             onError: () => NotificationManager.Create('Error', 'Failed To Get Items', 'danger')
         })
@@ -209,9 +216,12 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
         }
     }
 
+    onSearch = (v: string) => this.setState({...this.state, search: v, currentPage: 0}, () => { this.getItems() })
+
     render = () => {
         return (
-            <>
+            <div className="Dashboard">
+                <Input icon="magnify" value={this.state.search} onChange={this.onSearch} placeholder="search"/>
                 { this.props.usePopup ? 
                     <>
                         <this.RenderLibrary/>
@@ -231,7 +241,7 @@ export default class ImageSelector<T extends { id: number, name: string }> exten
                             </Popup.Footer>
                         </Popup>
                     </> : this.props.isEditing ? <div id={this.props.id}>{this.props.children}</div> : <this.RenderLibrary/>}
-            </>
+            </div>
         )
     }
 }
