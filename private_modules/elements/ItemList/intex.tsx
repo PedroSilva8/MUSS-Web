@@ -9,11 +9,12 @@ export interface IItemListItemProps {
     image?: string
     iconSize?: number
     icon?: string
+    placeHolder?: string
     onClick?: () => void
 }
 
 const ItemListItem : React.FC<IItemListItemProps> = props => {
-    return <ImageSelector onClick={ props.onClick ? props.onClick : () => {} } image={ props.image } text={props.title} icon={props.icon} iconSize={props.iconSize} />
+    return <ImageSelector placeholderIcon={props.placeHolder} onClick={ props.onClick ? props.onClick : () => {} } image={ props.image } text={props.title} icon={props.icon} iconSize={props.iconSize} placeholderIconSize={props.iconSize} />
 }
 
 interface IItemListComposition {

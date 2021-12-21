@@ -6,7 +6,7 @@ export interface IArtist {
 const defaultArtist : IArtist = { id: -1, name: "" }
 
 export interface IAlbum {
-    [key: string]: number | string;
+    [key: string]: any;
     id: number
     artist_id: number
     name: string
@@ -16,7 +16,7 @@ export interface IAlbum {
 const defaultAlbum : IAlbum = { id: -1, artist_id: -1, name: "", description: "" }
 
 export interface IMusic {
-    [key: string]: number | string;
+    [key: string]: any;
     id: number
     album_id: number
     name: string
@@ -36,4 +36,14 @@ export interface IUser {
 
 const defaultUser : IUser = { id: -1, name: "", password: "", isAdmin: false }
 
-export { defaultMusic, defaultUser, defaultArtist, defaultAlbum }
+export interface IPlaylist {
+    [key: string]: any;
+    id: number
+    userId: number
+    name: string
+    description: string
+}
+
+const defaultPlaylist : IPlaylist = { id: -1, userId: -1, name: "", description: "" }
+
+export { defaultMusic, defaultUser, defaultArtist, defaultAlbum, defaultPlaylist }

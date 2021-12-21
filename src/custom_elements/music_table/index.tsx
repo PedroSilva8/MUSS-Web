@@ -1,36 +1,39 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react"
 
-import { IMusic } from "@interface/database";
-import RestWraper from "@global/RestWraper";
-import NotificationManager from "@modules/global/NotificationManager";
+import { IMusic } from "@interface/database"
+import RestWraper from "@global/RestWraper"
+import NotificationManager from "@global/NotificationManager"
+import musicContext from "@context/MusicContext"
+
+import './music_table.scss'
+import userContext from "@context/AuthContext"
 
 export interface IMusicTableProps {
-    albumId: number
+    target: string
+    arguments: { [key: string]: string; }
 }
 
 export interface IMusicTableState {
     musics: IMusic[]
 }
 
-import './music_table.scss'
-import musicContext from "@context/MusicContext";
-
 const MusicTable = (props: IMusicTableProps) => {
 
     const { setMusic } = React.useContext(musicContext)
     const [ state, setState ] = React.useState<IMusicTableState>({ musics: [] })
+    const { token } = React.useContext(userContext)
 
-    var restMusic = new RestWraper<IMusic>("music")
+    var restMusic = new RestWraper<IMusic>(props.target)
 
     useEffect(() => {
-        restMusic.GetWhere({
-            arguments: {
-                album_id: props.albumId.toString()
-            },
-            onSuccess: (musicsData) => setState({ musics: musicsData }),
-            onError: () => NotificationManager.Create('Error', "Failed To Get Algum", 'danger')
-        })
-    }, [])
+        if (token.isLoaded)
+            restMusic.GetWhere({
+                token: token.token,
+                arguments: props.arguments,
+                onSuccess: (musicsData) => setState({ musics: musicsData }),
+                onError: () => NotificationManager.Create('Error', "Failed To Get Algum", 'danger')
+            })
+    }, [token.isLoaded])
 
     return (
         <div className="music-table">

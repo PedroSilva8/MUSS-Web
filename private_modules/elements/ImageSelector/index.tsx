@@ -27,7 +27,7 @@ export default class ImageSelector extends React.Component<IImageSelectorProps, 
         onChange: () => { },
         placeholderIcon: "",
         text: "",
-        placeholderIconSize: 100
+        placeholderIconSize: 24
     };
 
     onClick = () => this.props.onClick ? this.props.onClick() : this.imageFile.current.click()

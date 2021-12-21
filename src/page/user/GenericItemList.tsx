@@ -9,6 +9,9 @@ export interface IGenericItemListProps<T> {
     restName: string
     restTarget: string
     imageRestName: string
+    arguments: { [key: string]: string; }
+    canCreate: boolean
+    onCreate: () => void
     onClick: (selected: T) => void
 }
 
@@ -20,7 +23,8 @@ const GenericItemList = <T extends { id: number, name: string }>(props: IGeneric
 
     useEffect(() => {
         restFeed.GetAll({
-            custom: `/${props.restTarget}`,
+            custom: `${props.restTarget}`,
+            arguments: props.arguments,
             onSuccess: (Data) => setItems(Data),
             onError: () => NotificationManager.Create("Error", "Error Getting List", 'danger')
         })
@@ -29,10 +33,17 @@ const GenericItemList = <T extends { id: number, name: string }>(props: IGeneric
     return (
         <>
             <ItemList title={props.title}>
+                { props.canCreate ? <ItemList.Item onClick={props.onCreate} placeHolder="plus" title="New" icon="plus" iconSize={50}/> : <></> }
                 { Items.map((v, i) => <ItemList.Item onClick={() => props.onClick(v)} title={v.name} icon="play" iconSize={50} image={restAlbum.GetImage(v.id)} key={i}/>)}
             </ItemList>
         </>
     );
+}
+
+GenericItemList.defaultProps = {
+    arguments: { },
+    onCreate: () => { },
+    canCreate: false
 }
 
 export default GenericItemList

@@ -34,7 +34,7 @@ const AlbumDisplayPage = () => {
                 </div>
             </div>
             <div id="album-display-content">
-                <MusicTable albumId={parseInt(id)}/>
+                <MusicTable target="music" arguments={{ album_id: id }}/>
             </div>
         </div>
     )

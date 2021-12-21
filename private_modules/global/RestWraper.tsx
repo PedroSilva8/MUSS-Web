@@ -58,7 +58,7 @@ export interface IUpdateImage {
 
 export interface ICreate<T> {
     token?: string
-    data: T
+    data?: T
     onSuccess: (Data: T) => void
     onError: (Data: RestResponse) => void
 }
@@ -181,7 +181,7 @@ export default class RestWraper<T> {
     Create = (props:ICreate<T>) => {
         RestHelper.CreateItem({
             target: this.Target,
-            arguments: { ...props.data, ...(props.token && { token: props.token } ) },
+            arguments: { ...(props.data && props.data), ...(props.token && { token: props.token } ) },
             onSuccess: (data) => props.onSuccess(this.DataToArray(data.data)[0]),
             onError: props.onError
         })

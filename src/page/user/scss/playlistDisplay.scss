@@ -1,10 +1,10 @@
-#album-display {
+#playlist-display {
     display: flex;
     flex-direction: column;
     width: 100%;
     overflow: auto;
     
-    > #album-display-header {
+    > #playlist-display-header {
         height: 30%;
         margin: 10px;
         display: flex;
@@ -17,7 +17,7 @@
             box-shadow: 0 0 10px black;
         }
 
-        > #album-display-name {
+        > #playlist-display-name {
             flex: 1;
             margin-left: 20px;
             display: flex;
@@ -33,7 +33,7 @@
         }
     }
 
-    > #album-display-content {
+    > #playlist-display-content {
         flex: 1;
     }
 }

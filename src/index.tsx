@@ -39,21 +39,22 @@ const App = () => {
 
   useEffect(() => {
     var auth = Cookies.get('auth')
-    setToken({token: auth ? auth : "", isLoaded: true})
+    setToken({token: auth ? auth : "", isLoaded: false})
   }, [])
 
   useEffect(() => {
     if (token.token && token.token != "")
       RestHelper.GetItems({
         target: "user/token",
-        arguments: { token: token },
+        arguments: { token: token.token },
         onSuccess: (Data) => {
           if (Data.data)
             setUser(Data.data)
+          setToken({...token, isLoaded: true})
         },
-        onError: () => {}
+        onError: () => setToken({...token, isLoaded: true})
       })
-  }, [token])
+  }, [token.token])
 
   return (
     <>

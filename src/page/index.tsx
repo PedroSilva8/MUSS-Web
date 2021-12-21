@@ -1,18 +1,18 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react"
 import { Route, Routes, useNavigate } from "react-router-dom"
 
 import FeedPage from "./user/feed"
-import AlbumDisplayPage from "./user/albumDispaly";
-import MusicPlayer from "@elements/MusicPlayer";
+import AlbumDisplayPage from "./user/albumDispaly"
+import MusicPlayer from "@elements/MusicPlayer"
 
-import musicContext, { defaultMusicContex } from "@context/MusicContext";
-import { IMusic } from "@interface/database";
-import RestWraper from "@global/RestWraper";
-import userContext from "@context/AuthContext";
+import musicContext, { defaultMusicContex } from "@context/MusicContext"
+import { IMusic } from "@interface/database"
+import RestWraper from "@global/RestWraper"
+import userContext from "@context/AuthContext"
+import PageHeader from "./pageHeader"
+import PlaylistPage from "./user/playlist"
 
 import './scss/index.scss'
-import Cookies from "js-cookie";
-import PageHeader from "./pageHeader";
 
 export default () => {
     var restMusic = new RestWraper<IMusic>("music")
@@ -34,6 +34,7 @@ export default () => {
                         { /* TODO: Find out why regex nor string[] is workign on paths */ }
                         <Route path={"/"} element={<FeedPage />} />
                         <Route path={"/album/:id"} element={<AlbumDisplayPage />}/>
+                        <Route path={"/playlist/:id"} element={<PlaylistPage />}/>
                     </Routes>
                 </div>
                 <MusicPlayer src={restMusic.GetFile(music.id, "music")} id="global-music-player"/>
