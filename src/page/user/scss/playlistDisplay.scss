@@ -33,7 +33,17 @@
         }
     }
 
+    > #playlist-display-mid {
+        display: flex;
+        flex-direction: row;
+        margin: 10px;
+        margin-bottom: 0px;
+        gap: 5px;
+    }
+
     > #playlist-display-content {
         flex: 1;
+        padding: 20px;
+        padding-top: 0px;
     }
 }

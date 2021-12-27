@@ -21,6 +21,9 @@ export interface Theme {
     border?: string
     border_alt?: string
 
+    context?: string
+    context_alt?: string
+
     green?: string
     red?: string
 }

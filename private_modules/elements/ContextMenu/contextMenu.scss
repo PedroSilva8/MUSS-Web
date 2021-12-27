@@ -1,0 +1,21 @@
+.element-context-menu {
+    position: absolute;
+    flex-direction: column;
+    width: 170px;
+    background-color: var(--context);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0px 0px 3px RGBA(var(--rgb-boxShadow), 0.5);
+
+    > .element-context-menu-item {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        transition: var(--default-transition);
+
+        &:hover {
+            cursor: pointer;
+            background-color: var(--context-alt);
+        }
+    }
+}

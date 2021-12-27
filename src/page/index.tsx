@@ -21,7 +21,7 @@ export default () => {
     const navigate = useNavigate()
 
     useEffect(() => {
-        if (token.isLoaded && token.token == "")
+        if (token.isLoaded && !token.token)
             navigate("/auth")
     }, [token])
 

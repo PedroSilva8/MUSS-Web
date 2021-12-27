@@ -6,7 +6,7 @@ export interface IMusicContext {
 }
 
 export interface Token {
-    token: string,
+    token?: string,
     isLoaded: boolean
 }
 

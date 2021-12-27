@@ -26,7 +26,9 @@ Themehandler.Themes.push({
   background: "#1a1a1a",
   font: "#fff",
   highlight: "#896ac8",
-  border: '#896ac8'
+  border: '#896ac8',
+  context: '#282828',
+  context_alt: '#141414'
 })
 
 Themehandler.SetTheme("dark");
@@ -35,15 +37,15 @@ Themehandler.SetTheme("dark");
 
 const App = () => {
   const [ user, setUser ] = useState<IUser>(defaultUser)
-  const [ token, setToken ] = useState<Token>({ token: "", isLoaded: false })
+  const [ token, setToken ] = useState<Token>({ token: undefined, isLoaded: false })
 
   useEffect(() => {
     var auth = Cookies.get('auth')
-    setToken({token: auth ? auth : "", isLoaded: false})
+    setToken({token: auth ? auth : undefined, isLoaded: false})
   }, [])
 
   useEffect(() => {
-    if (token.token && token.token != "")
+    if (token.token && !token.isLoaded)
       RestHelper.GetItems({
         target: "user/token",
         arguments: { token: token.token },
@@ -52,7 +54,7 @@ const App = () => {
             setUser(Data.data)
           setToken({...token, isLoaded: true})
         },
-        onError: () => setToken({...token, isLoaded: true})
+        onError: () => setToken({token: undefined, isLoaded: true})
       })
   }, [token.token])
 

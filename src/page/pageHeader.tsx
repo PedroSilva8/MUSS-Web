@@ -11,8 +11,8 @@ const PageHeader = () => {
     const { user, setToken } = useContext(userContext)
 
     const Logout = () => {
-        Cookies.set('auth', "")
-        setToken({ token: "", isLoaded: true })
+        Cookies.set('auth', undefined)
+        setToken({ token: undefined, isLoaded: true })
         navegate("/auth")
     }
 
