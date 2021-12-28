@@ -3,7 +3,7 @@ import React, { useContext, useState } from "react";
 import ImageSelector from '@elements/ImageSelector'
 import Input from "@elements/Input"
 import TextArea from "@elements/TextArea"
-import MusicPlayer from "@elements/MusicPlayer"
+import MusicPlayer, { MusicPlayerHandle } from "@elements/MusicPlayer"
 
 import { defaultAlbum, defaultMusic, IAlbum, IMusic } from "@interface/database"
 
@@ -33,7 +33,7 @@ const MusicPage = () => {
     
     const musicEditor = React.createRef<GenericEditor<IMusic>>()
     const coverFile = React.createRef<ImageSelector>()
-    const musicFile = React.createRef<MusicPlayer>() 
+    const musicFile = React.createRef<MusicPlayerHandle>() 
 
     const { token } = useContext(userContext)
     const [state, setState] = useState<IMusicState>({ 
@@ -115,7 +115,7 @@ const MusicPage = () => {
                     <ImageSelector ref={ coverFile } onChange={(img) => setState({...state, cover: img})} image={state.cover != "" || state.music?.id == -1 ? state.cover : rest.GetImage(state.music?.id)} text="Cover"/>
                     <Input onChange={(v) => { state.music.name = v; setState({...state, music: state.music}) }} value={ state.music?.name } label="Name"/>
                     <TextArea onChange={(v) => { state.music.description = v; setState({...state, music: state.music}) }} value={ state.music?.description } label="Description"/>
-                    <MusicPlayer canUpload={true} musics={[rest.GetFile(state.music?.id, "music")]} ref={ musicFile }/>
+                    <MusicPlayer canUpload={true} id="" ref={ musicFile }/>
                 </GenericEditor>
             </GenericEditor>
         </>

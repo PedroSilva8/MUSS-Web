@@ -3,7 +3,7 @@ import { Route, Routes, useNavigate } from "react-router-dom"
 
 import FeedPage from "./user/feed"
 import AlbumDisplayPage from "./user/albumDispaly"
-import MusicPlayer from "@elements/MusicPlayer"
+import MusicPlayer, { MusicPlayerHandle } from "@elements/MusicPlayer"
 
 import musicContext, { defaultMusicContex } from "@context/MusicContext"
 import { IMusic } from "@interface/database"
@@ -20,10 +20,17 @@ export default () => {
     const { token } = useContext(userContext)
     const navigate = useNavigate()
 
+    const musicFile = React.createRef<MusicPlayerHandle>() 
+
     useEffect(() => {
         if (token.isLoaded && !token.token)
             navigate("/auth")
     }, [token])
+
+    useEffect(() => {
+        if (musicFile.current)
+            musicFile.current.setMusic(music.map((v) => restMusic.GetFile(v.id, 'music')))
+    }, [music])
 
     return (
         <>
@@ -37,7 +44,7 @@ export default () => {
                         <Route path={"/playlist/:id"} element={<PlaylistPage />}/>
                     </Routes>
                 </div>
-                <MusicPlayer musics={[...(music.length != 0 ? music.map((v) => restMusic.GetFile(v.id, "music")) : [])]} id="global-music-player"/>
+                <MusicPlayer ref={musicFile} canUpload={false} id="global-music-player"/>
             </musicContext.Provider>
         </>
     );

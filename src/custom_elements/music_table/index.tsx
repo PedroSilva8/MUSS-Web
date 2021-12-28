@@ -22,10 +22,10 @@ export interface IMusicTableState {
 }
 
 export type MusicTableHandle = {
-    getMusics: () => IMusic[];
-  };
+    getMusics: () => IMusic[]
+}
 
-const MusicTable = React.forwardRef<MusicTableHandle, IMusicTableProps>((props: IMusicTableProps, ref) => {
+const MusicTable = React.forwardRef<MusicTableHandle, IMusicTableProps>((props, ref) => {
 
     const { token } = React.useContext(userContext)
     const { setMusic } = React.useContext(musicContext)
@@ -37,7 +37,7 @@ const MusicTable = React.forwardRef<MusicTableHandle, IMusicTableProps>((props: 
 
     React.useImperativeHandle(ref, () => ({
         getMusics: () => state.musics
-    }));
+    }))
 
     useEffect(() => {
         if (token.isLoaded)

@@ -30,7 +30,11 @@ const Slider = (props: ISliderProps) => {
             updateSlider((props.value * 100 / props.maxValue).toString())
     })
 
-    const updateSlider = (value: any) => sliderProgress.current.style.width = `calc(${value}% - 5px)`
+    useEffect(() => updateSlider((props.value * 1000 / (props.maxValue == 0 ? 1 : props.maxValue)).toString()), [])
+
+    const updateSlider = (value: any) => {
+        sliderProgress.current.style.width = `calc(${value}% - 5px)`
+    }
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         updateSlider((parseFloat(e.target.value) * 100 / props.maxValue).toString())

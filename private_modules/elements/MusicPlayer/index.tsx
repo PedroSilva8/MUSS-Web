@@ -1,7 +1,7 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useEffect, useRef } from "react"
 
-import Icon from "@elements/Icon";
-import Slider from "@elements/Slider";
+import Icon from "@elements/Icon"
+import Slider from "@elements/Slider"
 
 /* Importing typescript-cookie directly is giving an error */
 import Cookies from 'js-cookie'
@@ -11,133 +11,136 @@ import './MusicPlayer.scss'
 export interface IMusicPlayerProps { 
     id: string
     canUpload: boolean
-    musics: string[]
 }
 
 export interface IMusicPlayerState { 
     playerSlider: number
-    isPlaying: boolean
-    duration: number
-    audio: number
+    volume: number,
+    audio: HTMLAudioElement,
     curMusic: number
+    musics: string[]
 }
 
-export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMusicPlayerState> {
+export type MusicPlayerHandle = {
+    hasMusic: () => File
+    getMusic: (onSuccess: (image: string) => void, onError: (err: DOMException) => void) => void
+    setMusic: (musics: string[]) => void
+}
 
-    audioFile = React.createRef<HTMLInputElement>() 
-    audio: HTMLAudioElement = new Audio()
-    isUnmounting = false
+const MusicPlayer = React.forwardRef<MusicPlayerHandle, IMusicPlayerProps>((props, ref) => {
 
-    public static defaultProps = {
-        src: "",
-        id: "",
-        canUpload: false
-    };
+    const audioFile = React.createRef<HTMLInputElement>()
+    const stateRef = useRef<IMusicPlayerState>() /* Needed Because Of Audio Callback */
 
-    constructor(props: IMusicPlayerProps) {
-        super(props)
-        this.state = { playerSlider: 0, isPlaying: false, duration: 100, audio: this.audio.volume = !isNaN(parseFloat(Cookies.get("volume"))) ? parseFloat(Cookies.get("volume")) : 1, curMusic: 0 }
-    }
+    const [ state, setState ] = React.useState<IMusicPlayerState>({
+         playerSlider: 0,
+         volume: !isNaN(parseFloat(Cookies.get("volume"))) ? parseFloat(Cookies.get("volume")) : 1,
+         audio: new Audio(),
+         curMusic: 0,
+         musics: []
+        })
 
-    componentDidMount = () => {            
-        this.audio.ontimeupdate = this.onAudioProgress
-        this.audio.onloadeddata = this.onAudioLoad
-        this.audio.oncanplaythrough = () => this.audio.play()
-        this.audio.onplay = () =>  this.setState({isPlaying: true})
-        this.audio.onpause = () =>  this.isUnmounting ? () => {} : this.setState({isPlaying: false})
-        this.audio.onended = this.onAudioEnd
+    React.useImperativeHandle(ref, () => ({
+        hasMusic: hasMusic,
+        getMusic: getMusic,
+        setMusic: setMusic
+    }))
+
+    useEffect(() => {
+        stateRef.current = state
+    }, [state])
+
+    useEffect(() => {
+        state.audio.ontimeupdate = () => {
+            setState({...stateRef.current, playerSlider: state.audio.currentTime * 1000})
+        }
+        state.audio.oncanplaythrough = () => state.audio.play()
+        state.audio.onended = onAudioEnd
         
-        if (this.props.musics.length != 0)
-            this.audio.src = this.props.musics[this.state.curMusic]
-    }
+        if (state.musics.length != 0)
+            state.audio.src = state.musics[state.curMusic]
+    }, [])
 
-    componentWillUnmount = () => {
-        this.isUnmounting = true
-        this.audio.pause()
-        delete this.audio
-    }
+    useEffect(() => {
+        if (state.musics.length != 0) {
+            state.audio.src = state.musics[state.curMusic]
+            state.audio.play()
+        }
+    }, [state.curMusic, state.musics])
 
-    onSelectAudio = (e: ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        state.audio.volume = state.volume
+    }, [state.volume])
+
+    const onSelectAudio = (e: ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files || !e.target.files[0])
             return
         
-        this.audio.src = URL.createObjectURL(e.target.files[0])
-        this.setState({isPlaying: true})
+            state.audio.src = URL.createObjectURL(e.target.files[0])
     }
 
-    onAudioLoad = () => {
-        this.setState({duration: this.audio.duration*1000})
+    const setMusic = (musics: string[]) => {
+        setState({...state, musics: musics, curMusic: 0})
     }
 
-    componentDidUpdate(prevProps: IMusicPlayerProps) {
-        if (prevProps.musics != this.props.musics && prevProps.musics[this.state.curMusic] != this.props.musics[this.state.curMusic])
-            this.audio.src = this.props.musics[this.state.curMusic]
+    const onMusicSliderChange = (val: number) => {
+        state.audio.currentTime = Math.min(Math.max(val / 1000, 0), state.audio.duration - 1)
+        setState({...state, playerSlider: val})
+        state.audio.play()
     }
 
-    onAudioProgress = (e: ProgressEvent<EventTarget>) => {
-        if (this.audio)
-            this.setState({playerSlider: this.audio.currentTime * 1000})
+    const changeAudioState = () => {
+        state.audio.paused ? state.audio.play() : state.audio.pause()
     }
 
-    onAudioSliderChange = (val: number) => {
-        this.audio.currentTime = Math.min(Math.max(val/1000, 0), this.state.duration/1000 - 1)
-        this.setState({playerSlider: val, isPlaying: true})
-        this.audio.play()
-    }
-
-    changeAudioState = () => {
-        this.state.isPlaying ? this.audio.pause() : this.audio.play()
-    }
-
-    onMusicChange = () => {
-        this.audio.src = this.props.musics[this.state.curMusic]
-    }
-
-    onAudioEnd = () => {
-        if (this.state.curMusic + 1 >= this.props.musics.length)
-            this.setState({curMusic: 0}, this.onMusicChange)
+    const onAudioEnd = () => {
+        const state = stateRef.current
+        if (state.curMusic + 1 >= state.musics.length)
+            setState({...state, curMusic: 0})
         else 
-            this.setState({curMusic: this.state.curMusic + 1}, this.onMusicChange)
+            setState({...state, curMusic: state.curMusic + 1})
+        state.audio.src = state.musics[state.curMusic]
+        state.audio.play()
     }
 
-    onAudioChange = (val: number) => {
-        this.setState({audio: val})
-        this.audio.volume = val
+    const onAudioChange = (val: number) => {
+        setState({...state, volume: val})
         Cookies.set('volume', val.toString())
     }
 
-    hasMusic = () => this.audioFile.current.files && this.audioFile.current.files[0]
+    const hasMusic = () => audioFile.current.files && audioFile.current.files[0]
 
-    getMusicLength = () => {
-        if (this.hasMusic())
-            return new Date(this.audio.duration * 1000).toISOString().substr(11, 8);
+    const getMusicLength = () => {
+        if (hasMusic())
+            return new Date(state.audio.duration * 1000).toISOString().substr(11, 8);
         return "00:00:00"
     }
 
-    getMusic = (onSuccess: (image: string) => void, onError: (err: DOMException) => void) => {
-        if (this.hasMusic()) {
+    const getMusic = (onSuccess: (image: string) => void, onError: (err: DOMException) => void) => {
+        if (hasMusic()) {
             var FR = new FileReader()
             FR.onload = () => onSuccess(FR.result.toString())
             FR.onerror= () => onError(FR.error)
-            FR.readAsDataURL(this.audioFile.current.files[0])
+            FR.readAsDataURL(audioFile.current.files[0])
         }
     }
 
-    render = () => {
-        return (
-            <div id={ this.props.id } className="element-music-player">
-                { this.props.canUpload ?  <>
-                        <Icon onClick={() => this.audioFile.current.click() } canHover={true} icon="upload"/>
-                        <input type="file" ref={this.audioFile} onChange={this.onSelectAudio} style={{display: 'none'}}/>
-                    </>:<></>
-                }
-                <Icon canHover={true} onClick={this.changeAudioState} icon={ this.state.isPlaying ? "pause" : "play" }/>
-                <Slider id="player-slider" onChange={this.onAudioSliderChange} value={this.state.playerSlider} maxValue={this.state.duration} />
-                <Icon canHover={true} icon="volume-high"/>
-                <div className="audioSlider">
-                    <Slider onChange={this.onAudioChange} value={this.state.audio} step={0.01} maxValue={1}/>
-                </div>
+    
+    return (
+        <div id={ props.id } className="element-music-player">
+            { props.canUpload ?  <>
+                    <Icon onClick={() => audioFile.current.click() } canHover={true} icon="upload"/>
+                    <input type="file" ref={audioFile} onChange={onSelectAudio} style={{display: 'none'}}/>
+                </>:<></>
+            }
+            <Icon canHover={true} onClick={changeAudioState} icon={ !state.audio.paused ? "pause" : "play" }/>
+            <Slider id="player-slider" onChange={onMusicSliderChange} value={state.playerSlider} maxValue={isNaN(state.audio.duration) ? 0 : state.audio.duration * 1000} />
+            <Icon canHover={true} icon="volume-high"/>
+            <div className="audioSlider">
+                <Slider onChange={onAudioChange} value={state.volume /* Using Audio Volume Directly Causes Lag */} step={0.01} maxValue={1}/>
             </div>
-        );
-    }
-}
+        </div>
+    )
+})
+
+export default MusicPlayer
