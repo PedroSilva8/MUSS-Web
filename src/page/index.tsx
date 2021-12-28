@@ -16,7 +16,7 @@ import './scss/index.scss'
 
 export default () => {
     var restMusic = new RestWraper<IMusic>("music")
-    const [ music, setMusic ] = useState<IMusic>(defaultMusicContex.music)
+    const [ music, setMusic ] = useState<IMusic[]>(defaultMusicContex.music)
     const { token } = useContext(userContext)
     const navigate = useNavigate()
 
@@ -37,7 +37,7 @@ export default () => {
                         <Route path={"/playlist/:id"} element={<PlaylistPage />}/>
                     </Routes>
                 </div>
-                <MusicPlayer src={restMusic.GetFile(music.id, "music")} id="global-music-player"/>
+                <MusicPlayer musics={[...(music.length != 0 ? music.map((v) => restMusic.GetFile(v.id, "music")) : [])]} id="global-music-player"/>
             </musicContext.Provider>
         </>
     );

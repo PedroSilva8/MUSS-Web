@@ -21,7 +21,11 @@ export interface IMusicTableState {
     musics: IMusic[]
 }
 
-const MusicTable = (props: IMusicTableProps) => {
+export type MusicTableHandle = {
+    getMusics: () => IMusic[];
+  };
+
+const MusicTable = React.forwardRef<MusicTableHandle, IMusicTableProps>((props: IMusicTableProps, ref) => {
 
     const { token } = React.useContext(userContext)
     const { setMusic } = React.useContext(musicContext)
@@ -30,6 +34,10 @@ const MusicTable = (props: IMusicTableProps) => {
     const [ state, setState ] = React.useState<IMusicTableState>({ musics: [] })
 
     var restMusic = new RestWraper<IMusic>(props.target)
+
+    React.useImperativeHandle(ref, () => ({
+        getMusics: () => state.musics
+    }));
 
     useEffect(() => {
         if (token.isLoaded)
@@ -60,7 +68,7 @@ const MusicTable = (props: IMusicTableProps) => {
                     <span>TIME</span>
                 </div>
                 <div className="music-table-rows">
-                    { state.musics.map((val, i) => <div onContextMenu={onContextMenu} key={i} onClick={() => setMusic(val)} className="music-table-row">
+                    { state.musics.map((val, i) => <div onContextMenu={onContextMenu} key={i} onClick={() => setMusic([val])} className="music-table-row">
                         <span>{ i + 1 }</span>
                         <span className="music-table-grow">{ val.name }</span>
                         <span>{ val.length }</span>
@@ -69,9 +77,6 @@ const MusicTable = (props: IMusicTableProps) => {
             </div>
         </>
     );
-}
-
-MusicTable.defaultProps = {
-};
+})
 
 export default MusicTable

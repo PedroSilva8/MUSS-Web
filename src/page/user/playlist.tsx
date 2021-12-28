@@ -1,17 +1,19 @@
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { useNavigate, useParams } from "react-router"
 
 import { defaultPlaylist, IPlaylist } from "@interface/database"
 import RestWraper from "@global/RestWraper"
 import NotificationManager from "@global/NotificationManager"
-import MusicTable from "@customElements/music_table"
+import MusicTable, { MusicTableHandle } from "@customElements/music_table"
+import userContext from "@context/AuthContext"
+import musicContext from "@context/MusicContext"
+import Icon from "@elements/Icon"
 
 import './scss/playlistDisplay.scss'
-import userContext from "@context/AuthContext"
-import Icon from "@modules/elements/Icon"
 
 const PlaylistPage = () => {
     const { user, token } = React.useContext(userContext)
+    const { setMusic } = React.useContext(musicContext)
     const [ playlist, setPlaylist ] = React.useState<IPlaylist>(defaultPlaylist)
     const Title = React.useRef<HTMLHeadingElement>()
     const { id } = useParams()
@@ -73,6 +75,13 @@ const PlaylistPage = () => {
         })
     }
 
+    const musicRef = useRef<MusicTableHandle>()
+
+    const onPlayAll = () => {
+        if (musicRef.current)
+            setMusic(musicRef.current.getMusics())
+    }   
+
     return (
         <div id="playlist-display">
             <div id="playlist-display-header">
@@ -82,11 +91,11 @@ const PlaylistPage = () => {
                 </div>
             </div>
             <div id="playlist-display-mid">
-                <Icon canHover={true} icon="play"/>
+                <Icon canHover={true} onClick={onPlayAll} icon="play"/>
                 <Icon canHover={true} onClick={onDelete} icon="delete"/>
             </div>
             <div id="playlist-display-content">
-                <MusicTable target="music" arguments={{ playlist_id: id }}/>
+                <MusicTable ref={musicRef} target="music" arguments={{ playlist_id: id }}/>
             </div>
         </div>
     )

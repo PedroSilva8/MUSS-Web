@@ -115,7 +115,7 @@ const MusicPage = () => {
                     <ImageSelector ref={ coverFile } onChange={(img) => setState({...state, cover: img})} image={state.cover != "" || state.music?.id == -1 ? state.cover : rest.GetImage(state.music?.id)} text="Cover"/>
                     <Input onChange={(v) => { state.music.name = v; setState({...state, music: state.music}) }} value={ state.music?.name } label="Name"/>
                     <TextArea onChange={(v) => { state.music.description = v; setState({...state, music: state.music}) }} value={ state.music?.description } label="Description"/>
-                    <MusicPlayer canUpload={true} src={rest.GetFile(state.music?.id, "music")} ref={ musicFile }/>
+                    <MusicPlayer canUpload={true} musics={[rest.GetFile(state.music?.id, "music")]} ref={ musicFile }/>
                 </GenericEditor>
             </GenericEditor>
         </>

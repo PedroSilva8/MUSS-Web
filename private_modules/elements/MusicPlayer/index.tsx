@@ -9,9 +9,9 @@ import Cookies from 'js-cookie'
 import './MusicPlayer.scss'
 
 export interface IMusicPlayerProps { 
-    src: string
     id: string
     canUpload: boolean
+    musics: string[]
 }
 
 export interface IMusicPlayerState { 
@@ -19,6 +19,7 @@ export interface IMusicPlayerState {
     isPlaying: boolean
     duration: number
     audio: number
+    curMusic: number
 }
 
 export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMusicPlayerState> {
@@ -35,7 +36,7 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
 
     constructor(props: IMusicPlayerProps) {
         super(props)
-        this.state = { playerSlider: 0, isPlaying: false, duration: 100, audio: this.audio.volume = !isNaN(parseFloat(Cookies.get("volume"))) ? parseFloat(Cookies.get("volume")) : 1 }
+        this.state = { playerSlider: 0, isPlaying: false, duration: 100, audio: this.audio.volume = !isNaN(parseFloat(Cookies.get("volume"))) ? parseFloat(Cookies.get("volume")) : 1, curMusic: 0 }
     }
 
     componentDidMount = () => {            
@@ -44,7 +45,10 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
         this.audio.oncanplaythrough = () => this.audio.play()
         this.audio.onplay = () =>  this.setState({isPlaying: true})
         this.audio.onpause = () =>  this.isUnmounting ? () => {} : this.setState({isPlaying: false})
-        this.audio.src = this.props.src
+        this.audio.onended = this.onAudioEnd
+        
+        if (this.props.musics.length != 0)
+            this.audio.src = this.props.musics[this.state.curMusic]
     }
 
     componentWillUnmount = () => {
@@ -66,8 +70,8 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
     }
 
     componentDidUpdate(prevProps: IMusicPlayerProps) {
-        if (prevProps.src != this.props.src)
-            this.audio.src = this.props.src
+        if (prevProps.musics != this.props.musics && prevProps.musics[this.state.curMusic] != this.props.musics[this.state.curMusic])
+            this.audio.src = this.props.musics[this.state.curMusic]
     }
 
     onAudioProgress = (e: ProgressEvent<EventTarget>) => {
@@ -83,6 +87,17 @@ export default class MusicPlayer extends React.Component<IMusicPlayerProps, IMus
 
     changeAudioState = () => {
         this.state.isPlaying ? this.audio.pause() : this.audio.play()
+    }
+
+    onMusicChange = () => {
+        this.audio.src = this.props.musics[this.state.curMusic]
+    }
+
+    onAudioEnd = () => {
+        if (this.state.curMusic + 1 >= this.props.musics.length)
+            this.setState({curMusic: 0}, this.onMusicChange)
+        else 
+            this.setState({curMusic: this.state.curMusic + 1}, this.onMusicChange)
     }
 
     onAudioChange = (val: number) => {

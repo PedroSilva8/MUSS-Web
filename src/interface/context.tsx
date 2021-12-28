@@ -1,8 +1,8 @@
 import { IMusic, IUser } from '@interface/database'
 
 export interface IMusicContext {
-    music: IMusic
-    setMusic?: (music: IMusic) => void
+    music: IMusic[]
+    setMusic?: (music: IMusic[]) => void
 }
 
 export interface Token {
